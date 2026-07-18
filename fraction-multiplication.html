@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数乘整数 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .main-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    max-width: 860px;
+    width: 100%;
+  }
+  .top-section {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    border-radius: 16px;
+    background: #f1f5f9;
+  }
+  .controls {
+    flex: 1;
+    min-width: 260px;
+  }
+  .control-group {
+    margin-bottom: 24px;
+  }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .control-group label span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+    transition: transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  .fraction-display {
+    text-align: center;
+    padding: 16px 0 4px;
+  }
+  .fraction-display .katex { font-size: 1.5em; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 20px;
+  }
+  .steps-section {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .steps-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step .katex { font-size: 1.2em; }
+  .answer-card {
+    background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+    border: 2px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .answer-card .katex { font-size: 1.6em; }
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+  @media (max-width: 700px) {
+    .top-section { flex-direction: column; align-items: center; }
+    .controls { width: 100%; }
+    .main-card { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>分数乘整数 · 交互演示</h1>
+<p class="subtitle">拖动滑块，观察蛋糕分割与乘法运算的对应关系</p>
+
+<div class="main-card">
+  <div class="top-section">
+    <div class="canvas-wrap">
+      <canvas id="cake" width="340" height="340"></canvas>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>蛋糕平均分成几份（分母）<span id="vDen">9</span></label>
+        <input type="range" id="sDen" min="3" max="16" value="9">
+      </div>
+      <div class="control-group">
+        <label>每人吃几份（分子）<span id="vNum">2</span></label>
+        <input type="range" id="sNum" min="1" max="8" value="2">
+      </div>
+      <div class="control-group">
+        <label>一共几个人（乘数）<span id="vPpl">3</span></label>
+        <input type="range" id="sPpl" min="1" max="8" value="3">
+      </div>
+      <hr class="divider">
+      <div class="fraction-display" id="eqLine1"></div>
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="answer-card" id="answer"></div>
+</div>
+
+<script>
+const COLORS = ['#3b82f6','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+const LIGHT = ['#dbeafe','#fef3c7','#d1fae5','#fee2e2','#ede9fe','#fce7f3','#cffafe','#ecfccb'];
+const canvas = document.getElementById('cake');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, CX = W/2, CY = H/2, R = 138;
+
+const sDen = document.getElementById('sDen');
+const sNum = document.getElementById('sNum');
+const sPpl = document.getElementById('sPpl');
+const vDen = document.getElementById('vDen');
+const vNum = document.getElementById('vNum');
+const vPpl = document.getElementById('vPpl');
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+function renderKatex(el, tex) {
+  try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+  catch(e) { el.textContent = tex; }
+}
+
+function drawCake(den, num, ppl) {
+  ctx.clearRect(0, 0, W, H);
+
+  // background circle (plate)
+  ctx.beginPath();
+  ctx.arc(CX, CY, R + 12, 0, Math.PI * 2);
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fill();
+
+  const step = Math.PI * 2 / den;
+  const gap = 0.02;
+
+  // draw slices
+  for (let i = 0; i < den; i++) {
+    const a0 = i * step - Math.PI / 2 + gap;
+    const a1 = (i + 1) * step - Math.PI / 2 - gap;
+
+    ctx.beginPath();
+    ctx.moveTo(CX, CY);
+    ctx.arc(CX, CY, R, a0, a1);
+    ctx.closePath();
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  // highlight slices per person
+  let idx = 0;
+  for (let p = 0; p < ppl; p++) {
+    for (let n = 0; n < num; n++) {
+      if (idx >= den) break;
+      const i = idx;
+      const a0 = i * step - Math.PI / 2 + gap;
+      const a1 = (i + 1) * step - Math.PI / 2 - gap;
+
+      ctx.beginPath();
+      ctx.moveTo(CX, CY);
+      ctx.arc(CX, CY, R - 2, a0, a1);
+      ctx.closePath();
+      ctx.fillStyle = LIGHT[p % COLORS.length];
+      ctx.fill();
+      ctx.strokeStyle = COLORS[p % COLORS.length];
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // inner arc fill for emphasis
+      ctx.beginPath();
+      ctx.moveTo(CX, CY);
+      ctx.arc(CX, CY, R * 0.55, a0, a1);
+      ctx.closePath();
+      ctx.fillStyle = COLORS[p % COLORS.length];
+      ctx.globalAlpha = 0.25;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      idx++;
+    }
+  }
+
+  // center dot
+  ctx.beginPath();
+  ctx.arc(CX, CY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#94a3b8';
+  ctx.fill();
+
+  // total text
+  const total = num * ppl;
+  const g = gcd(total, den);
+  const simpNum = total / g;
+  const simpDen = den / g;
+  const canSimplify = g > 1;
+
+  ctx.font = 'bold 16px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#1e293b';
+  const totalLabel = total + '/' + den;
+  ctx.fillText(totalLabel + (canSimplify ? '  =  ' + simpNum + '/' + simpDen : ''), CX, CY + R + 36);
+
+  // title label
+  ctx.font = '600 13px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('共 ' + ppl + ' 人，每人 ' + num + '/' + den + ' 个', CX, 22);
+}
+
+function buildLegend(ppl) {
+  const el = document.getElementById('legend');
+  el.innerHTML = '';
+  for (let p = 0; p < ppl; p++) {
+    const d = document.createElement('div');
+    d.className = 'legend-item';
+    d.innerHTML = `<span class="legend-dot" style="background:${COLORS[p % COLORS.length]}"></span>第${['一','二','三','四','五','六','七','八'][p]}人`;
+    el.appendChild(d);
+  }
+}
+
+function update() {
+  const den = +sDen.value;
+  let num = +sNum.value;
+  const ppl = +sPpl.value;
+  if (num >= den) { num = den - 1; sNum.value = num; }
+  sNum.max = den - 1;
+
+  vDen.textContent = den;
+  vNum.textContent = num;
+  vPpl.textContent = ppl;
+
+  drawCake(den, num, ppl);
+  buildLegend(ppl);
+
+  const total = num * ppl;
+  const g = gcd(total, den);
+  const simpNum = total / g;
+  const simpDen = den / g;
+  const canSimplify = g > 1;
+
+  // equation line 1: fraction × integer
+  const eq1 = document.getElementById('eqLine1');
+  renderKatex(eq1, `\\frac{${num}}{${den}} \\times ${ppl}`);
+
+  // steps
+  const stepsEl = document.getElementById('steps');
+  let html = '';
+
+  // Step 1: meaning
+  html += `<div class="step"><span class="step-num">1</span><span>`;
+  renderKatex(document.createDocumentFragment(), `\\text{意义：${ppl} 个 } \\frac{${num}}{${den}} \\text{ 相加}`);
+  const s1span = document.createElement('span');
+  renderKatex(s1span, `\\text{意义：${ppl} 个 } \\frac{${num}}{${den}} \\text{ 相加}`);
+  html += s1span.innerHTML;
+  html += `</span></div>`;
+
+  // Step 2: expansion
+  if (ppl <= 5) {
+    const parts = Array(ppl).fill(`\\frac{${num}}{${den}}`);
+    const addParts = Array(ppl).fill(num);
+    html += `<div class="step"><span class="step-num">2</span><span>`;
+    const s2a = document.createElement('span');
+    renderKatex(s2a, `\\frac{${num}}{${den}} \\times ${ppl} = ${parts.join(' + ')} = \\frac{${addParts.join('+')}}{${den}} = \\frac{${total}}{${den}}`);
+    html += s2a.innerHTML;
+    html += `</span></div>`;
+  } else {
+    html += `<div class="step"><span class="step-num">2</span><span>`;
+    const s2b = document.createElement('span');
+    renderKatex(s2b, `\\frac{${num}}{${den}} \\times ${ppl} = \\frac{${num} \\times ${ppl}}{${den}} = \\frac{${total}}{${den}}`);
+    html += s2b.innerHTML;
+    html += `</span></div>`;
+  }
+
+  // Step 3: simplify
+  if (canSimplify) {
+    html += `<div class="step"><span class="step-num">3</span><span>`;
+    const s3 = document.createElement('span');
+    renderKatex(s3, `\\frac{${total}}{${den}} = \\frac{${total}\\div${g}}{${den}\\div${g}} = \\frac{${simpNum}}{${simpDen}}`);
+    html += s3.innerHTML;
+    html += `</span></div>`;
+  }
+
+  stepsEl.innerHTML = html;
+
+  // answer
+  const ans = document.getElementById('answer');
+  if (canSimplify) {
+    const a = document.createElement('span');
+    renderKatex(a, `\\boxed{\\frac{${num}}{${den}} \\times ${ppl} = \\frac{${simpNum}}{${simpDen}}}\\text{ 个}`);
+    ans.innerHTML = a.innerHTML;
+  } else {
+    const a = document.createElement('span');
+    renderKatex(a, `\\boxed{\\frac{${num}}{${den}} \\times ${ppl} = \\frac{${total}}{${den}}}\\text{ 个}`);
+    ans.innerHTML = a.innerHTML;
+  }
+}
+
+sDen.addEventListener('input', update);
+sNum.addEventListener('input', update);
+sPpl.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
