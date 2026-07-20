@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分数乘法应用 - 蔬菜大棚问题</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.05);
+            border-right: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .title {
+            font-size: 26px;
+            color: #64ffda;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #64ffda;
+        }
+        
+        .problem-box {
+            background: rgba(100, 255, 218, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #64ffda;
+        }
+        
+        .problem-label {
+            font-size: 14px;
+            color: #64ffda;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .problem-text {
+            font-size: 20px;
+            line-height: 1.8;
+        }
+        
+        .question-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .question-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        
+        .question-card.active {
+            background: rgba(100, 255, 218, 0.15);
+            border-left: 4px solid #64ffda;
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: #64ffda;
+            color: #1a1a2e;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+        
+        .question-title {
+            font-size: 18px;
+            display: inline;
+        }
+        
+        .solution {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .solution.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 3px solid #ffd700;
+        }
+        
+        .step-label {
+            color: #ffd700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .step-content {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .answer-box {
+            background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .answer-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .answer-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .hint-box {
+            background: rgba(255, 193, 7, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .hint-icon {
+            color: #ffc107;
+            margin-right: 8px;
+        }
+        
+        .method-tag {
+            display: inline-block;
+            background: #64ffda;
+            color: #1a1a2e;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .right-panel {
+            width: 500px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        canvas {
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #64ffda 0%, #00bcd4 100%);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(100, 255, 218, 0.4);
+        }
+        
+        .btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .btn.secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64ffda, #00bcd4);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        
+        .info-text {
+            margin-top: 15px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1 class="title">蔬菜大棚问题 - 分数乘法应用</h1>
+            
+            <div class="problem-box">
+                <div class="problem-label">题目</div>
+                <div class="problem-text">
+                    一个蔬菜大棚的面积是 480 m²，其中一半种各种萝卜。红萝卜地的面积占萝卜地的 \(\frac{1}{4}\)。红萝卜地有多少平方米？
+                </div>
+            </div>
+            
+            <!-- 方法1 -->
+            <div class="question-card" id="q1" onclick="showSolution(1)">
+                <span class="question-number">1</span>
+                <span class="question-title">分步计算法</span>
+                
+                <div class="solution" id="sol1">
+                    <div class="method-tag">方法一：先求萝卜地，再求红萝卜地</div>
+                    
+                    <div class="step">
+                        <div class="step-label">第一步：求萝卜地面积</div>
+                        <div class="step-content">
+                            萝卜地占大棚的一半：<br>
+                            \(480 \times \frac{1}{2} = 240\) (m²)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">第二步：求红萝卜地面积</div>
+                        <div class="step-content">
+                            红萝卜地占萝卜地的 \(\frac{1}{4}\)：<br>
+                            \(240 \times \frac{1}{4} = 60\) (m²)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">综合算式</div>
+                        <div class="step-content">
+                            \(480 \times \frac{1}{2} \times \frac{1}{4} = 60\) (m²)
+                        </div>
+                    </div>
+                    
+                    <div class="answer-box">
+                        <div class="answer-label">答</div>
+                        <div class="answer-value">红萝卜地有 60 m²</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 方法2 -->
+            <div class="question-card" id="q2" onclick="showSolution(2)">
+                <span class="question-number">2</span>
+                <span class="question-title">综合运算法</span>
+                
+                <div class="solution" id="sol2">
+                    <div class="method-tag">方法二：先求红萝卜地占大棚的几分之几</div>
+                    
+                    <div class="step">
+                        <div class="step-label">第一步：求红萝卜地占大棚的比例</div>
+                        <div class="step-content">
+                            \(\frac{1}{2} \times \frac{1}{4} = \frac{1}{8}\)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">第二步：求红萝卜地面积</div>
+                        <div class="step-content">
+                            \(480 \times \frac{1}{8} = 60\) (m²)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">综合算式</div>
+                        <div class="step-content">
+                            \(480 \times (\frac{1}{2} \times \frac{1}{4}) = 60\) (m²)
+                        </div>
+                    </div>
+                    
+                    <div class="answer-box">
+                        <div class="answer-label">答</div>
+                        <div class="answer-value">红萝卜地有 60 m²</div>
+                    </div>
+                    
+                    <div class="hint-box">
+                        <span class="hint-icon">💡</span>
+                        <strong>提示：</strong>两种方法都运用了乘法结合律，结果相同。
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <canvas id="canvas" width="450" height="550"></canvas>
+            
+            <div class="controls">
+                <button class="btn" onclick="playAnimation()">播放动画</button>
+                <button class="btn secondary" onclick="resetAnimation()">重置</button>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%"></div>
+            </div>
+            
+            <div class="info-text" id="info">点击"播放动画"开始演示</div>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const info = document.getElementById('info');
+        const progress = document.getElementById('progress');
+        
+        let animFrame = 0;
+        let step = 0;
+        let isPlaying = false;
+        
+        // 绘制背景
+        function drawBackground() {
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#1a3a2e');
+            grad.addColorStop(1, '#0d2137');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // 绘制大棚
+        function drawGreenhouse(x, y, width, height, alpha = 1) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            
+            // 大棚主体
+            ctx.fillStyle = '#4a7c59';
+            ctx.beginPath();
+            ctx.moveTo(x, y + height);
+            ctx.lineTo(x, y + height * 0.3);
+            ctx.quadraticCurveTo(x + width / 2, y - height * 0.2, x + width, y + height * 0.3);
+            ctx.lineTo(x + width, y + height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 塑料薄膜
+            ctx.fillStyle = 'rgba(200, 230, 200, 0.3)';
+            ctx.fill();
+            
+            // 棚架线条
+            ctx.strokeStyle = '#2d5a3d';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                const px = x + (width / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(px, y + height);
+                ctx.lineTo(px, y + height * 0.3);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+        
+        // 绘制萝卜地
+        function drawPlot(x, y, width, height, color, label, alpha = 1) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+            
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, width, height);
+            
+            if (label) {
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 14px Microsoft YaHei';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, x + width / 2, y + height / 2 + 5);
+            }
+            
+            ctx.restore();
+        }
+        
+        // 绘制文字
+        function drawText(text, x, y, size, color = '#fff', align = 'center') {
+            ctx.fillStyle = color;
+            ctx.font = `bold ${size}px Microsoft YaHei`;
+            ctx.textAlign = align;
+            ctx.fillText(text, x, y);
+        }
+        
+        // 绘制箭头
+        function drawArrow(x1, y1, x2, y2, color = '#64ffda') {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            
+            // 箭头
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - 15 * Math.cos(angle - Math.PI / 6), y2 - 15 * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - 15 * Math.cos(angle + Math.PI / 6), y2 - 15 * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        
+        // 绘制进度指示器
+        function drawStepIndicator() {
+            const steps = ['题目', '萝卜地', '计算1', '红萝卜地', '计算2', '完成'];
+            const startX = 30;
+            const gap = 70;
+            
+            steps.forEach((s, i) => {
+                const x = startX + i * gap;
+                const active = i === step;
+                const completed = i < step;
+                
+                ctx.fillStyle = completed ? '#64ffda' : active ? '#ffd700' : 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(x, 25, 12, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = completed || active ? '#1a1a2e' : 'rgba(255,255,255,0.5)';
+                ctx.font = 'bold 11px Microsoft YaHei';
+                ctx.textAlign = 'center';
+                ctx.fillText(i + 1, x, 29);
+            });
+        }
+        
+        // 主动画循环
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            drawStepIndicator();
+            
+            switch(step) {
+                case 0: // 题目展示
+                    drawGreenhouse(50, 100, 350, 200);
+                    drawText('蔬菜大棚', 225, 220, 20, '#fff');
+                    drawText('总面积：480 m²', 225, 280, 18, '#ffd700');
+                    info.textContent = '题目：蔬菜大棚面积 480 m²';
+                    break;
+                    
+                case 1: // 萝卜地
+                    drawGreenhouse(50, 100, 350, 200, 0.5);
+                    drawPlot(70, 150, 160, 120, '#8B4513', '萝卜地\n(1/2)');
+                    drawPlot(240, 150, 140, 120, '#228B22', '其他');
+                    
+                    drawArrow(225, 150, 150, 150, '#ffd700');
+                    drawText('1/2', 185, 140, 16, '#ffd700');
+                    
+                    drawText('萝卜地占大棚的 1/2', 225, 350, 18, '#64ffda');
+                    info.textContent = '第一步：萝卜地占大棚的一半';
+                    break;
+                    
+                case 2: // 计算1
+                    drawPlot(50, 100, 350, 150, '#8B4513', '萝卜地');
+                    
+                    drawText('计算萝卜地面积', 225, 60, 18, '#64ffda');
+                    drawText('480 × 1/2 = 240 m²', 225, 200, 22, '#fff');
+                    
+                    // 动画效果
+                    const progress1 = Math.min(animFrame / 30, 1);
+                    ctx.fillStyle = 'rgba(100, 255, 218, 0.3)';
+                    ctx.fillRect(50, 100, 350 * progress1, 150);
+                    
+                    info.textContent = '计算：480 × 1/2 = 240 m²';
+                    break;
+                    
+                case 3: // 红萝卜地
+                    drawPlot(50, 80, 350, 120, '#8B4513', '萝卜地 (240 m²)');
+                    drawPlot(50, 80, 87, 120, '#DC143C', '红萝卜\n(1/4)');
+                    drawPlot(137, 80, 87, 120, '#FFA500', '白萝卜');
+                    drawPlot(224, 80, 87, 120, '#FFA500', '青萝卜');
+                    drawPlot(311, 80, 89, 120, '#FFA500', '其他');
+                    
+                    drawArrow(137, 80, 93, 80, '#ffd700');
+                    drawText('1/4', 115, 70, 14, '#ffd700');
+                    
+                    drawText('红萝卜地占萝卜地的 1/4', 225, 260, 18, '#64ffda');
+                    info.textContent = '第二步：红萝卜地占萝卜地的 1/4';
+                    break;
+                    
+                case 4: // 计算2
+                    drawPlot(50, 80, 350, 100, '#8B4513', '萝卜地');
+                    drawPlot(50, 80, 87, 100, '#DC143C', '红萝卜');
+                    
+                    drawText('计算红萝卜地面积', 225, 50, 18, '#64ffda');
+                    drawText('240 × 1/4 = 60 m²', 225, 220, 22, '#fff');
+                    
+                    const progress2 = Math.min(animFrame / 30, 1);
+                    ctx.fillStyle = 'rgba(220, 20, 60, 0.5)';
+                    ctx.fillRect(50, 80, 87, 100 * progress2);
+                    
+                    info.textContent = '计算：240 × 1/4 = 60 m²';
+                    break;
+                    
+                case 5: // 完成
+                    drawGreenhouse(50, 60, 350, 180, 0.3);
+                    drawPlot(70, 100, 150, 100, '#8B4513', '萝卜地');
+                    drawPlot(70, 100, 37, 100, '#DC143C', '红萝卜');
+                    
+                    drawText('🎉 计算完成！', 225, 30, 24, '#64ffda');
+                    drawText('红萝卜地面积', 225, 320, 18, '#fff');
+                    drawText('60 m²', 225, 360, 32, '#ffd700');
+                    
+                    // 占比可视化
+                    drawText('占大棚面积：60/480 = 1/8', 225, 410, 16, '#64ffda');
+                    
+                    info.textContent = '答案：红萝卜地有 60 m²';
+                    isPlaying = false;
+                    break;
+            }
+            
+            progress.style.width = (step / 5 * 100) + '%';
+            animFrame++;
+            
+            if (isPlaying) {
+                requestAnimationFrame(animate);
+            }
+        }
+        
+        function showSolution(num) {
+            document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
+            document.querySelectorAll('.solution').forEach(s => s.classList.remove('show'));
+            
+            document.getElementById('q' + num).classList.add('active');
+            document.getElementById('sol' + num).classList.add('show');
+            
+            MathJax.typeset();
+            
+            if (num === 1) {
+                step = 1;
+                setTimeout(() => step = 2, 1500);
+            } else if (num === 2) {
+                step = 3;
+                setTimeout(() => step = 4, 1500);
+            }
+            
+            if (!isPlaying) {
+                isPlaying = true;
+                animate();
+            }
+        }
+        
+        function playAnimation() {
+            if (!isPlaying) {
+                isPlaying = true;
+                if (step >= 5) step = 0;
+                autoPlay();
+                animate();
+            }
+        }
+        
+        function autoPlay() {
+            const interval = setInterval(() => {
+                if (step < 5) {
+                    step++;
+                    updateUI();
+                } else {
+                    clearInterval(interval);
+                    isPlaying = false;
+                }
+            }, 2500);
+        }
+        
+        function updateUI() {
+            if (step === 1 || step === 2) {
+                showSolutionSilent(1);
+            } else if (step === 3 || step === 4) {
+                showSolutionSilent(2);
+            }
+        }
+        
+        function showSolutionSilent(num) {
+            document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
+            document.querySelectorAll('.solution').forEach(s => s.classList.remove('show'));
+            document.getElementById('q' + num).classList.add('active');
+            document.getElementById('sol' + num).classList.add('show');
+            MathJax.typeset();
+        }
+        
+        function resetAnimation() {
+            isPlaying = false;
+            step = 0;
+            animFrame = 0;
+            
+            document.querySelectorAll('.solution').forEach(s => s.classList.remove('show'));
+            document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            drawStepIndicator();
+            drawGreenhouse(100, 150, 250, 150);
+            drawText('点击"播放动画"开始', 225, 400, 18, 'rgba(255,255,255,0.7)');
+            
+            progress.style.width = '0%';
+            info.textContent = '点击"播放动画"开始演示';
+        }
+        
+        // 页面加载后自动播放
+        window.onload = function() {
+            setTimeout(() => {
+                playAnimation();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
