@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分数乘法交互教学</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* 左侧：题面与解析 */
+        .left-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.05);
+            border-right: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .title {
+            font-size: 28px;
+            color: #64ffda;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #64ffda;
+        }
+        
+        .problem-box {
+            background: rgba(100, 255, 218, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #64ffda;
+        }
+        
+        .problem-label {
+            font-size: 14px;
+            color: #64ffda;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .problem-text {
+            font-size: 20px;
+            line-height: 1.8;
+        }
+        
+        .question-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .question-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        
+        .question-card.active {
+            background: rgba(100, 255, 218, 0.15);
+            border-left: 4px solid #64ffda;
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: #64ffda;
+            color: #1a1a2e;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+        
+        .question-title {
+            font-size: 18px;
+            display: inline;
+        }
+        
+        .solution {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .solution.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 3px solid #ffd700;
+        }
+        
+        .step-label {
+            color: #ffd700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .step-content {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .answer-box {
+            background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .answer-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .answer-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .hint-box {
+            background: rgba(255, 193, 7, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .hint-icon {
+            color: #ffc107;
+            margin-right: 8px;
+        }
+        
+        /* 右侧：动画演示 */
+        .right-panel {
+            width: 500px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        canvas {
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #64ffda 0%, #00bcd4 100%);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(100, 255, 218, 0.4);
+        }
+        
+        .btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .btn.secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64ffda, #00bcd4);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        
+        .info-text {
+            margin-top: 15px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧：题面与解析 -->
+        <div class="left-panel">
+            <h1 class="title">分数乘法交互教学</h1>
+            
+            <div class="problem-box">
+                <div class="problem-label">题目条件</div>
+                <div class="problem-text">
+                    乌贼每分钟可游 \(\frac{9}{10}\) km。
+                </div>
+            </div>
+            
+            <!-- 问题1 -->
+            <div class="question-card" id="q1" onclick="showSolution(1)">
+                <span class="question-number">1</span>
+                <span class="question-title">李叔叔每分钟游的距离是乌贼的 \(\frac{4}{45}\)，李叔叔每分钟游多少千米？</span>
+                
+                <div class="solution" id="sol1">
+                    <div class="step">
+                        <div class="step-label">分析</div>
+                        <div class="step-content">
+                            李叔叔的速度 = 乌贼速度 × \(\frac{4}{45}\)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">列式</div>
+                        <div class="step-content">
+                            \(\frac{9}{10} \times \frac{4}{45}\)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">计算（先约分）</div>
+                        <div class="step-content">
+                            \(\frac{9}{10} \times \frac{4}{45} = \frac{9 \times 4}{10 \times 45} = \frac{36}{450} = \frac{2}{25}\) km
+                        </div>
+                    </div>
+                    
+                    <div class="answer-box">
+                        <div class="answer-label">答</div>
+                        <div class="answer-value">李叔叔每分钟游 \(\frac{2}{25}\) km</div>
+                    </div>
+                    
+                    <div class="hint-box">
+                        <span class="hint-icon">💡</span>
+                        <strong>技巧：</strong>计算前先约分，可以使计算更简便。
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 问题2 -->
+            <div class="question-card" id="q2" onclick="showSolution(2)">
+                <span class="question-number">2</span>
+                <span class="question-title">乌贼30分钟可以游多少千米？</span>
+                
+                <div class="solution" id="sol2">
+                    <div class="step">
+                        <div class="step-label">分析</div>
+                        <div class="step-content">
+                            路程 = 速度 × 时间
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">列式</div>
+                        <div class="step-content">
+                            \(\frac{9}{10} \times 30\)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-label">计算（约分）</div>
+                        <div class="step-content">
+                            \(\frac{9}{10} \times 30 = \frac{9 \times 30}{10} = \frac{270}{10} = 27\) km
+                        </div>
+                    </div>
+                    
+                    <div class="answer-box">
+                        <div class="answer-label">答</div>
+                        <div class="answer-value">乌贼30分钟可以游27千米</div>
+                    </div>
+                    
+                    <div class="hint-box">
+                        <span class="hint-icon">💡</span>
+                        <strong>技巧：</strong>分数乘整数，可以先约分再计算。
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧：动画演示 -->
+        <div class="right-panel">
+            <canvas id="canvas" width="450" height="500"></canvas>
+            
+            <div class="controls">
+                <button class="btn" onclick="playAnimation()">播放动画</button>
+                <button class="btn secondary" onclick="resetAnimation()">重置</button>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%"></div>
+            </div>
+            
+            <div class="info-text" id="info">点击"播放动画"开始演示</div>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const info = document.getElementById('info');
+        const progress = document.getElementById('progress');
+        
+        let animFrame = 0;
+        let step = 0;
+        let isPlaying = false;
+        let squidX = 50;
+        let personX = 50;
+        
+        // 绘制海洋背景
+        function drawOcean() {
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#0a1628');
+            grad.addColorStop(0.4, '#1a3a5c');
+            grad.addColorStop(1, '#0d2137');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 波浪
+            ctx.strokeStyle = 'rgba(100, 255, 218, 0.2)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                for (let x = 0; x < canvas.width; x += 5) {
+                    const y = 100 + i * 100 + Math.sin((x + animFrame * 2 + i * 60) * 0.02) * 15;
+                    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+        }
+        
+        // 绘制乌贼
+        function drawSquid(x, y, size, alpha = 1) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.translate(x, y);
+            
+            // 身体
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, size * 1.2, size * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 眼睛
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-size * 0.4, -size * 0.1, size * 0.15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(-size * 0.4, -size * 0.1, size * 0.08, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 触手
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                const sx = -size * 0.5 + i * size * 0.2;
+                const sy = size * 0.3;
+                const wave = Math.sin((animFrame * 0.1 + i) * 0.5) * 10;
+                ctx.moveTo(sx, sy);
+                ctx.quadraticCurveTo(sx + wave, sy + size * 0.4, sx + wave * 0.5, sy + size * 0.7);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+        
+        // 绘制人物
+        function drawPerson(x, y, size, alpha = 1) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.translate(x, y);
+            
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(-size * 0.3, -size * 0.2, size * 0.6, size * 0.8);
+            
+            ctx.fillStyle = '#ffeaa7';
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.4, size * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.45, size * 0.2, Math.PI, Math.PI * 2);
+            ctx.fill();
+            
+            const armWave = Math.sin(animFrame * 0.15) * 15;
+            ctx.strokeStyle = '#ffeaa7';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(-size * 0.3, 0);
+            ctx.lineTo(-size * 0.5, -size * 0.2 + armWave);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(size * 0.3, 0);
+            ctx.lineTo(size * 0.5, -size * 0.2 - armWave);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        // 绘制文字
+        function drawText(text, x, y, size, color = '#fff', align = 'center') {
+            ctx.fillStyle = color;
+            ctx.font = `bold ${size}px Microsoft YaHei`;
+            ctx.textAlign = align;
+            ctx.fillText(text, x, y);
+        }
+        
+        // 绘制分数
+        function drawFraction(num, den, x, y, size, color = '#fff') {
+            ctx.fillStyle = color;
+            ctx.font = `bold ${size}px Microsoft YaHei`;
+            ctx.textAlign = 'center';
+            ctx.fillText(num, x, y - size * 0.3);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x - size * 0.5, y);
+            ctx.lineTo(x + size * 0.5, y);
+            ctx.stroke();
+            ctx.fillText(den, x, y + size * 0.5);
+        }
+        
+        // 绘制进度指示器
+        function drawStepIndicator() {
+            const steps = ['题目', '问题1', '计算1', '问题2', '计算2', '完成'];
+            const startX = 50;
+            const gap = 70;
+            
+            steps.forEach((s, i) => {
+                const x = startX + i * gap;
+                const active = i === step;
+                const completed = i < step;
+                
+                ctx.fillStyle = completed ? '#64ffda' : active ? '#ffd700' : 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(x, 30, 12, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = completed || active ? '#1a1a2e' : 'rgba(255,255,255,0.5)';
+                ctx.font = 'bold 12px Microsoft YaHei';
+                ctx.textAlign = 'center';
+                ctx.fillText(i + 1, x, 34);
+            });
+        }
+        
+        // 主动画循环
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawOcean();
+            drawStepIndicator();
+            
+            switch(step) {
+                case 0: // 题目展示
+                    drawSquid(squidX, 200, 50);
+                    drawText('乌贼每分钟可游', canvas.width / 2, 120, 20, '#64ffda');
+                    drawFraction('9', '10', canvas.width / 2, 170, 28, '#fff');
+                    drawText('km', canvas.width / 2 + 60, 170, 20, '#ffd700');
+                    squidX += 1.5;
+                    if (squidX > 150) squidX = 150;
+                    info.textContent = '题目条件：乌贼速度';
+                    break;
+                    
+                case 1: // 问题1
+                    drawSquid(100, 180, 40);
+                    drawPerson(personX, 320, 50);
+                    drawText('问题1：李叔叔速度', canvas.width / 2, 80, 18, '#64ffda');
+                    drawText('李叔叔 = 乌贼 × ?', canvas.width / 2, 120, 16, '#fff');
+                    personX += 1.5;
+                    if (personX > 120) personX = 120;
+                    info.textContent = '问题1：求李叔叔的速度';
+                    break;
+                    
+                case 2: // 计算1
+                    drawSquid(80, 200, 35);
+                    drawPerson(80, 350, 40);
+                    drawText('计算过程', canvas.width / 2, 80, 18, '#64ffda');
+                    drawFraction('9', '10', 150, 160, 24, '#fff');
+                    drawText('×', 210, 160, 24, '#ffd700');
+                    drawFraction('4', '45', 270, 160, 24, '#fff');
+                    drawText('=', 330, 160, 24, '#ffd700');
+                    drawFraction('2', '25', 390, 160, 24, '#64ffda');
+                    drawText('km', 430, 160, 18, '#ffd700');
+                    
+                    // 约分动画
+                    if (animFrame % 80 < 40) {
+                        ctx.strokeStyle = '#ff6b6b';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.moveTo(130, 140);
+                        ctx.lineTo(250, 180);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(250, 140);
+                        ctx.lineTo(130, 180);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                    info.textContent = '计算：先约分，再相乘';
+                    break;
+                    
+                case 3: // 问题2
+                    drawSquid(100, 200, 40);
+                    drawText('问题2：乌贼30分钟', canvas.width / 2, 80, 18, '#64ffda');
+                    drawText('路程 = 速度 × 时间', canvas.width / 2, 120, 16, '#fff');
+                    
+                    // 时间指示
+                    for (let i = 0; i < 30; i++) {
+                        const angle = (i / 30) * Math.PI * 2 - Math.PI / 2;
+                        const x = canvas.width / 2 + Math.cos(angle) * 120;
+                        const y = 300 + Math.sin(angle) * 80;
+                        ctx.fillStyle = i < (animFrame / 5) % 30 ? '#64ffda' : 'rgba(255,255,255,0.2)';
+                        ctx.beginPath();
+                        ctx.arc(x, y, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    info.textContent = '问题2：求30分钟的路程';
+                    break;
+                    
+                case 4: // 计算2
+                    drawSquid(80, 250, 45);
+                    drawText('计算过程', canvas.width / 2, 80, 18, '#64ffda');
+                    drawFraction('9', '10', 150, 160, 24, '#fff');
+                    drawText('× 30 =', 250, 160, 24, '#ffd700');
+                    drawText('27', 350, 160, 32, '#64ffda');
+                    drawText('km', 400, 160, 20, '#ffd700');
+                    
+                    // 距离可视化
+                    const dist = Math.min(animFrame / 3, 100);
+                    ctx.strokeStyle = '#64ffda';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(50, 350);
+                    ctx.lineTo(50 + dist * 3, 350);
+                    ctx.stroke();
+                    drawText('0', 50, 380, 14, '#fff');
+                    drawText('27 km', 50 + dist * 3, 380, 14, '#64ffda');
+                    
+                    info.textContent = '计算：分数乘整数';
+                    break;
+                    
+                case 5: // 完成
+                    drawSquid(100, 200, 50);
+                    drawPerson(300, 250, 55);
+                    drawText('🎉 计算完成！', canvas.width / 2, 100, 28, '#64ffda');
+                    drawText('李叔叔：2/25 km/分钟', canvas.width / 2, 350, 18, '#ffd700');
+                    drawText('乌贼30分钟：27 km', canvas.width / 2, 390, 18, '#ffd700');
+                    info.textContent = '点击"重置"可重新观看';
+                    isPlaying = false;
+                    break;
+            }
+            
+            progress.style.width = (step / 5 * 100) + '%';
+            animFrame++;
+            
+            if (isPlaying) {
+                requestAnimationFrame(animate);
+            }
+        }
+        
+        function showSolution(num) {
+            document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
+            document.querySelectorAll('.solution').forEach(s => s.classList.remove('show'));
+            
+            document.getElementById('q' + num).classList.add('active');
+            document.getElementById('sol' + num).classList.add('show');
+            
+            MathJax.typeset();
+            
+            // 同步动画
+            if (num === 1) {
+                step = 1;
+                setTimeout(() => step = 2, 1000);
+            } else if (num === 2) {
+                step = 3;
+                setTimeout(() => step = 4, 1000);
+            }
+            
+            if (!isPlaying) {
+                isPlaying = true;
+                animate();
+            }
+        }
+        
+        function playAnimation() {
+            if (!isPlaying) {
+                isPlaying = true;
+                if (step >= 5) step = 0;
+                autoPlay();
+                animate();
+            }
+        }
+        
+        function autoPlay() {
+            const interval = setInterval(() => {
+                if (step < 5) {
+                    step++;
+                    updateUI();
+                } else {
+                    clearInterval(interval);
+                    isPlaying = false;
+                }
+            }, 2500);
+        }
+        
+        function updateUI() {
+            // 自动展开对应问题
+            if (step === 1 || step === 2) {
+                showSolutionSilent(1);
+            } else if (step === 3 || step === 4) {
+                showSolutionSilent(2);
+            }
+        }
+        
+        function showSolutionSilent(num) {
+            document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
+            document.querySelectorAll('.solution').forEach(s => s.classList.remove('show'));
+            document.getElementById('q' + num).classList.add('active');
+            document.getElementById('sol' + num).classList.add('show');
+            MathJax.typeset();
+        }
+        
+        function resetAnimation() {
+            isPlaying = false;
+            step = 0;
+            animFrame = 0;
+            squidX = 50;
+            personX = 50;
+            
+            document.querySelectorAll('.solution').forEach(s => s.classList.remove('show'));
+            document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawOcean();
+            drawStepIndicator();
+            drawSquid(canvas.width / 2, 250, 60);
+            drawText('点击"播放动画"开始', canvas.width / 2, 400, 18, 'rgba(255,255,255,0.7)');
+            
+            progress.style.width = '0%';
+            info.textContent = '点击"播放动画"开始演示';
+        }
+        
+        // 页面加载后自动播放
+        window.onload = function() {
+            setTimeout(() => {
+                playAnimation();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
