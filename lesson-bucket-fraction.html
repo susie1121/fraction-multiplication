@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>整数乘分数 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root { --primary:#2563eb; --bg:#f8fafc; --card:#fff; --text:#1e293b; --muted:#64748b; --border:#e2e8f0; --accent:#f59e0b; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:32px 16px; }
+  h1 { font-size:28px; font-weight:700; margin-bottom:8px; background:linear-gradient(135deg,#2563eb,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .subtitle { font-size:15px; color:var(--muted); margin-bottom:32px; }
+  .card { background:var(--card); border-radius:20px; box-shadow:0 4px 24px rgba(0,0,0,.08); padding:36px 40px; max-width:860px; width:100%; }
+  .top { display:flex; gap:40px; align-items:flex-start; margin-bottom:32px; }
+  canvas { display:block; border-radius:16px; background:#f1f5f9; }
+  .controls { flex:1; min-width:260px; }
+  .cg { margin-bottom:24px; }
+  .cg label { display:flex; justify-content:space-between; align-items:baseline; font-size:14px; font-weight:600; margin-bottom:10px; }
+  .cg label span { font-size:22px; font-weight:700; color:var(--primary); font-variant-numeric:tabular-nums; }
+  input[type="range"] { -webkit-appearance:none; width:100%; height:8px; border-radius:4px; background:#e2e8f0; outline:none; cursor:pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:var(--primary); border:3px solid #fff; box-shadow:0 2px 8px rgba(37,99,235,.3); cursor:grab; }
+  .eq-box { text-align:center; padding:16px 0 4px; }
+  .eq-box .katex { font-size:1.5em; }
+  hr { border:none; border-top:1px solid var(--border); margin:4px 0 20px; }
+  .steps { background:#f8fafc; border-radius:14px; padding:24px 28px; margin-bottom:20px; }
+  .steps h3 { font-size:15px; font-weight:700; color:var(--muted); margin-bottom:14px; letter-spacing:.5px; }
+  .step { display:flex; align-items:center; gap:14px; margin-bottom:12px; font-size:15px; }
+  .step:last-child { margin-bottom:0; }
+  .sn { width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+  .step .katex { font-size:1.15em; }
+  .answer { background:linear-gradient(135deg,#eff6ff,#f0f9ff); border:2px solid #bfdbfe; border-radius:14px; padding:20px 28px; text-align:center; }
+  .answer .katex { font-size:1.6em; }
+  .bar-wrap { margin:12px 0; }
+  .bar { height:32px; border-radius:8px; background:#e2e8f0; position:relative; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:8px; transition:width .4s ease, background .4s ease; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; }
+  .bar-label { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--muted); }
+  .unit-line { position:absolute; top:0; height:100%; border-left:2px dashed #cbd5e1; }
+  @media(max-width:700px) { .top{flex-direction:column;align-items:center;} .card{padding:24px 20px;} }
+</style>
+</head>
+<body>
+
+<h1>整数乘分数 · 交互演示</h1>
+<p class="subtitle">拖动滑块，观察整数与分数相乘的含义</p>
+
+<div data-gif-frames='{"sliderIds":["sTotal","sNum","sDen"],"values":[[12,1,2],[12,1,4],[12,3,8],[12,2,3],[20,3,4],[24,1,6],[12,1,2]]}'>
+<div class="card">
+  <div class="top">
+    <canvas id="c" width="340" height="380"></canvas>
+    <div class="controls">
+      <div class="cg">
+        <label>每桶体积（升）<span id="vTotal">12</span></label>
+        <input type="range" id="sTotal" min="1" max="50" value="12">
+      </div>
+      <div class="cg">
+        <label>取几分之几（分子）<span id="vNum">1</span></label>
+        <input type="range" id="sNum" min="1" max="12" value="1">
+      </div>
+      <div class="cg">
+        <label>取几分之几（分母）<span id="vDen">2</span></label>
+        <input type="range" id="sDen" min="2" max="12" value="2">
+      </div>
+      <hr>
+      <div class="eq-box" id="eq1"></div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="answer" id="answer"></div>
+</div>
+</div>
+
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),W=340,H=380,CX=W/2;
+
+function gcd(a,b){return b===0?a:gcd(b,a%b)}
+
+function render(el,tex){try{katex.render(tex,el,{throwOnError:false})}catch(e){el.textContent=tex}}
+
+function draw(total,num,den){
+  ctx.clearRect(0,0,W,H);
+  const val=total*num/den;
+
+  // Barrel
+  const bx=60,by=40,bw=100,bh=260;
+  const waterH=bh*(val/total);
+  const waterY=by+bh-waterH;
+
+  // Barrel body
+  ctx.beginPath();
+  ctx.roundRect(bx,by,bw,bh,8);
+  ctx.fillStyle='#e0e7ef';
+  ctx.fill();
+  ctx.strokeStyle='#94a3b8';
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  // Water
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(bx,by,bw,bh,8);
+  ctx.clip();
+  ctx.fillStyle='#60a5fa';
+  ctx.globalAlpha=0.4;
+  ctx.fillRect(bx,waterY,bw,waterH);
+  ctx.globalAlpha=1;
+  ctx.restore();
+
+  // Water level line
+  ctx.beginPath();
+  ctx.moveTo(bx-8,waterY);
+  ctx.lineTo(bx+bw+8,waterY);
+  ctx.strokeStyle='#2563eb';
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  // Scale marks
+  ctx.font='12px -apple-system,sans-serif';
+  ctx.fillStyle='#64748b';
+  ctx.textAlign='right';
+  for(let i=0;i<=total;i+=Math.max(1,Math.floor(total/6))){
+    const y=by+bh-i/total*bh;
+    ctx.fillText(i,bx-10,y+4);
+    ctx.beginPath();
+    ctx.moveTo(bx-4,y);
+    ctx.lineTo(bx,y);
+    ctx.strokeStyle='#cbd5e1';
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
+
+  // Barrel label
+  ctx.font='bold 16px -apple-system,"PingFang SC",sans-serif';
+  ctx.textAlign='center';
+  ctx.fillStyle='#1e293b';
+  ctx.fillText(total+' L',CX+40,by+bh+30);
+
+  // Bucket count (show 3 barrels)
+  const bx2=bx+bw+30,bx3=bx2+bw+30;
+  ctx.globalAlpha=0.3;
+  [bx2,bx3].forEach(x=>{
+    ctx.beginPath();
+    ctx.roundRect(x,by,bw,bh,8);
+    ctx.fillStyle='#e0e7ef';
+    ctx.fill();
+    ctx.strokeStyle='#94a3b8';
+    ctx.lineWidth=2;
+    ctx.stroke();
+  });
+  ctx.globalAlpha=1;
+
+  // Value display
+  ctx.font='bold 20px -apple-system,"PingFang SC",sans-serif';
+  ctx.textAlign='left';
+  ctx.fillStyle='#2563eb';
+  ctx.fillText('= '+val.toFixed(2).replace(/\.?0+$/,'')+' L',bx+160,by+bh-waterH+10);
+
+  // Fraction bar
+  const barY=by+bh+52,barW=300,barH=28,barX=(W-barW)/2;
+  ctx.beginPath();
+  ctx.roundRect(barX,barY,barW,barH,8);
+  ctx.fillStyle='#e2e8f0';
+  ctx.fill();
+
+  const fillW=barW*(val/total);
+  ctx.beginPath();
+  ctx.roundRect(barX,barY,fillW,barH,8);
+  ctx.fillStyle='#2563eb';
+  ctx.fill();
+
+  ctx.font='bold 13px -apple-system,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillStyle='#fff';
+  ctx.fillText((val/total*100).toFixed(1)+'%',barX+fillW/2,barY+barH/2+5);
+
+  // Meaning text
+  ctx.font='14px -apple-system,"PingFang SC",sans-serif';
+  ctx.textAlign='center';
+  ctx.fillStyle='#1e293b';
+  ctx.fillText(`求 ${total} 的 ${num}/${den} 是多少`,CX,barY+barH+28);
+}
+
+function update(){
+  const total=+document.getElementById('sTotal').value;
+  let num=+document.getElementById('sNum').value;
+  let den=+document.getElementById('sDen').value;
+  if(num>=den){num=den-1;document.getElementById('sNum').value=num}
+  document.getElementById('sDen').max=12;
+  document.getElementById('sNum').max=den-1;
+
+  document.getElementById('vTotal').textContent=total;
+  document.getElementById('vNum').textContent=num;
+  document.getElementById('vDen').textContent=den;
+
+  draw(total,num,den);
+
+  const val=total*num/den;
+  const g=gcd(val,den);
+  const sNum=val/g,sDen=den/g;
+  const canSimplify=g>1;
+
+  render(document.getElementById('eq1'),`${total}\\times\\frac{${num}}{${den}}`);
+
+  const stepsEl=document.getElementById('steps');
+  let html='';
+  html+=`<div class="step"><span class="sn">1</span>`;
+  const s1=document.createElement('span');render(s1,`\\text{含义：求 }${total}\\text{ 的 }\\frac{${num}}{${den}}\\text{ 是多少}`);
+  html+=s1.innerHTML+`</div>`;
+
+  html+=`<div class="step"><span class="sn">2</span>`;
+  const s2=document.createElement('span');render(s2,`${total}\\times\\frac{${num}}{${den}}=\\frac{${total}\\times${num}}{${den}}=\\frac{${total*num}}{${den}}`);
+  html+=s2.innerHTML+`</div>`;
+
+  if(canSimplify){
+    html+=`<div class="step"><span class="sn">3</span>`;
+    const s3=document.createElement('span');render(s3,`\\frac{${total*num}}{${den}}=\\frac{${total*num}\\div${g}}{${den}\\div${g}}=\\frac{${sNum}}{${sDen}}`);
+    html+=s3.innerHTML+`</div>`;
+  }
+
+  html+=`<div class="step"><span class="sn">${canSimplify?4:3}</span>`;
+  const s4=document.createElement('span');render(s4,`\\text{答：${canSimplify?sNum+'/'+sDen:(total*num)+'/'+den} 升}`);
+  html+=s4.innerHTML+`</div>`;
+  stepsEl.innerHTML=html;
+
+  const ans=document.getElementById('answer');
+  if(canSimplify){
+    const a=document.createElement('span');render(a,`\\boxed{${total}\\times\\frac{${num}}{${den}}=\\frac{${sNum}}{${sDen}}}\\text{ 升}`);
+    ans.innerHTML=a.innerHTML;
+  }else{
+    const a=document.createElement('span');render(a,`\\boxed{${total}\\times\\frac{${num}}{${den}}=\\frac{${total*num}}{${den}}}\\text{ 升}`);
+    ans.innerHTML=a.innerHTML;
+  }
+}
+
+document.getElementById('sTotal').addEventListener('input',update);
+document.getElementById('sNum').addEventListener('input',update);
+document.getElementById('sDen').addEventListener('input',update);
+update();
+</script>
+</body>
+</html>
