@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数乘分数 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root{--p:#2563eb;--bg:#f8fafc;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px}
+  h1{font-size:28px;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,#2563eb,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:15px;color:var(--m);margin-bottom:32px}
+  .card{background:var(--c);border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:36px 40px;max-width:860px;width:100%}
+  .top{display:flex;gap:40px;align-items:flex-start;margin-bottom:32px}
+  canvas{display:block;border-radius:16px;background:#f1f5f9}
+  .ctrl{flex:1;min-width:260px}
+  .cg{margin-bottom:24px}
+  .cg label{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;font-weight:600;margin-bottom:10px}
+  .cg label span{font-size:22px;font-weight:700;color:var(--p);font-variant-numeric:tabular-nums}
+  input[type="range"]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;background:#e2e8f0;outline:none;cursor:pointer}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--p);border:3px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,.3);cursor:grab}
+  .eq{text-align:center;padding:16px 0 4px}.eq .katex{font-size:1.5em}
+  hr{border:none;border-top:1px solid var(--b);margin:4px 0 20px}
+  .steps{background:#f8fafc;border-radius:14px;padding:24px 28px;margin-bottom:20px}
+  .steps h3{font-size:15px;font-weight:700;color:var(--m);margin-bottom:14px;letter-spacing:.5px}
+  .step{display:flex;align-items:center;gap:14px;margin-bottom:12px;font-size:15px}.step:last-child{margin-bottom:0}
+  .sn{width:28px;height:28px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+  .step .katex{font-size:1.15em}
+  .ans{background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:2px solid #bfdbfe;border-radius:14px;padding:20px 28px;text-align:center}
+  .ans .katex{font-size:1.6em}
+  @media(max-width:700px){.top{flex-direction:column;align-items:center}.card{padding:24px 20px}}
+</style>
+</head>
+<body>
+
+<h1>分数乘分数 · 交互演示</h1>
+<p class="sub">拖动滑块，观察分数与分数相乘的含义</p>
+
+<div data-gif-frames='{"sliderIds":["sA","sB","sC","sD"],"values":[[1,2,1,5],[1,2,3,5],[3,4,2,3],[2,3,1,4],[1,3,2,5],[5,6,3,4],[1,2,1,5]]}'>
+<div class="card">
+  <div class="top">
+    <canvas id="c" width="340" height="400"></canvas>
+    <div class="ctrl">
+      <div class="cg">
+        <label>地的面积：分子<span id="vA">1</span></label>
+        <input type="range" id="sA" min="1" max="12" value="1">
+      </div>
+      <div class="cg">
+        <label>地的面积：分母<span id="vB">2</span></label>
+        <input type="range" id="sB" min="2" max="12" value="2">
+      </div>
+      <div class="cg">
+        <label>种植比例：分子<span id="vC">1</span></label>
+        <input type="range" id="sC" min="1" max="12" value="1">
+      </div>
+      <div class="cg">
+        <label>种植比例：分母<span id="vD">5</span></label>
+        <input type="range" id="sD" min="2" max="12" value="5">
+      </div>
+      <hr>
+      <div class="eq" id="eq1"></div>
+    </div>
+  </div>
+  <div class="steps"><h3>分步解析</h3><div id="steps"></div></div>
+  <div class="ans" id="answer"></div>
+</div>
+</div>
+
+<script>
+function gcd(a,b){return b===0?a:gcd(b,a%b)}
+function render(el,t){try{katex.render(t,el,{throwOnError:false})}catch(e){el.textContent=t}}
+
+function draw(a,b,c,d){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=340,H=400;
+  ctx.clearRect(0,0,W,H);
+  const val=a*c/b/d;
+  const mx=30,my=40,gw=280,gh=200,gx=(W-gw)/2,gy=my;
+
+  // Full field (1 hectare)
+  ctx.beginPath();ctx.roundRect(gx,gy,gw,gh,6);ctx.fillStyle='#e2e8f0';ctx.fill();
+  ctx.strokeStyle='#94a3b8';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillStyle='#64748b';
+  ctx.fillText('1 公顷',gx,gy-8);
+
+  // Divide into b parts (rows)
+  const rowH=gh/b;
+  for(let i=1;i<b;i++){
+    ctx.beginPath();ctx.moveTo(gx,gy+i*rowH);ctx.lineTo(gx+gw,gy+i*rowH);
+    ctx.strokeStyle='#cbd5e1';ctx.lineWidth=1;ctx.stroke();
+  }
+
+  // Highlight a rows (the plot = a/b hectare)
+  const plotH=rowH*a;
+  ctx.beginPath();ctx.roundRect(gx,gy,gw,plotH,6);ctx.fillStyle='#dbeafe';ctx.fill();
+  ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='bold 13px sans-serif';ctx.fillStyle='#2563eb';ctx.textAlign='right';
+  ctx.fillText(a+'/'+b+' 公顷',gx+gw+40,gy+plotH/2+4);
+
+  // Within the plot, divide into d columns
+  const colW=gw/d;
+  for(let i=1;i<d;i++){
+    ctx.beginPath();ctx.moveTo(gx+i*colW,gy);ctx.lineTo(gx+i*colW,gy+plotH);
+    ctx.strokeStyle='#93c5fd';ctx.lineWidth=1;ctx.stroke();
+  }
+
+  // Highlight c columns (the planted area)
+  const plantW=colW*c;
+  ctx.beginPath();ctx.rect(gx,gy,plantW,plotH);ctx.fillStyle='#3b82f6';ctx.globalAlpha=0.35;ctx.fill();ctx.globalAlpha=1;
+  ctx.strokeStyle='#1d4ed8';ctx.lineWidth=2;ctx.stroke();
+
+  // Count label
+  ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillStyle='#1e293b';
+  ctx.fillText('共 '+b+'×'+d+'='+b*d+' 份，取 '+a+'×'+c+'='+a*c+' 份',gx+gw/2,gy+gh+28);
+
+  // Result fraction bar
+  const by=gy+gh+48,bw=300,bh=28,bx=(W-bw)/2;
+  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.fillStyle='#e2e8f0';ctx.fill();
+  const fw=bw*(val);ctx.beginPath();ctx.roundRect(bx,by,fw,bh,8);ctx.fillStyle='#2563eb';ctx.fill();
+  ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';
+  ctx.fillText((val*100).toFixed(1)+'%',bx+fw/2,by+bh/2+5);
+
+  // Meaning text
+  ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillStyle='#1e293b';
+  const numText=a+'×'+c+'='+(a*c);
+  const denText=b+'×'+d+'='+(b*d);
+  ctx.fillText('分子相乘：'+numText,170,by+bh+28);
+  ctx.fillText('分母相乘：'+denText,170,by+bh+50);
+}
+
+function update(){
+  const a=+document.getElementById('sA').value;
+  let b=+document.getElementById('sB').value;
+  const c=+document.getElementById('sC').value;
+  let d=+document.getElementById('sD').value;
+  if(a>=b){document.getElementById('sA').value=b-1;return update()}
+  if(c>=d){document.getElementById('sC').value=d-1;return update()}
+  document.getElementById('sB').max=12;
+  document.getElementById('sD').max=12;
+  document.getElementById('sA').max=b-1;
+  document.getElementById('sC').max=d-1;
+  document.getElementById('vA').textContent=a;
+  document.getElementById('vB').textContent=b;
+  document.getElementById('vC').textContent=c;
+  document.getElementById('vD').textContent=d;
+  draw(a,b,c,d);
+
+  const num=a*c,den=b*d,g=gcd(num,den);
+  const sN=num/g,sD=den/g,can=g>1;
+
+  render(document.getElementById('eq1'),'\\frac{'+a+'}{'+b+'}\\times\\frac{'+c+'}{'+d+'}');
+
+  let html='';
+  html+='<div class="step"><span class="sn">1</span>';
+  const s1=document.createElement('span');render(s1,'\\text{含义：求 }\\frac{'+a+'}{'+b+'}\\text{ 的 }\\frac{'+c+'}{'+d+'}\\text{ 是多少}');
+  html+=s1.innerHTML+'</div>';
+
+  html+='<div class="step"><span class="sn">2</span>';
+  const s2=document.createElement('span');render(s2,'\\frac{'+a+'}{'+b+'}\\times\\frac{'+c+'}{'+d+'}=\\frac{'+a+'\\times'+c+'}{'+b+'\\times'+d+'}=\\frac{'+num+'}{'+den+'}');
+  html+=s2.innerHTML+'</div>';
+
+  if(can){
+    html+='<div class="step"><span class="sn">3</span>';
+    const s3=document.createElement('span');render(s3,'\\frac{'+num+'}{'+den+'}=\\frac{'+num+'\\div'+g+'}{'+den+'\\div'+g+'}=\\frac{'+sN+'}{'+sD+'}');
+    html+=s3.innerHTML+'</div>';
+  }
+
+  html+='<div class="step"><span class="sn">'+(can?4:3)+'</span>';
+  const s4=document.createElement('span');render(s4,'\\text{答：'+(can?sN+'/'+sD:num+'/'+den)+' 公顷}');
+  html+=s4.innerHTML+'</div>';
+  document.getElementById('steps').innerHTML=html;
+
+  const ans=document.getElementById('answer');
+  if(can){const a2=document.createElement('span');render(a2,'\\boxed{\\frac{'+a+'}{'+b+'}\\times\\frac{'+c+'}{'+d+'}=\\frac{'+sN+'}{'+sD+'}}\\text{ 公顷}');ans.innerHTML=a2.innerHTML}
+  else{const a2=document.createElement('span');render(a2,'\\boxed{\\frac{'+a+'}{'+b+'}\\times\\frac{'+c+'}{'+d+'}=\\frac{'+num+'}{'+den+'}}\\text{ 公顷}');ans.innerHTML=a2.innerHTML}
+}
+
+document.getElementById('sA').addEventListener('input',update);
+document.getElementById('sB').addEventListener('input',update);
+document.getElementById('sC').addEventListener('input',update);
+document.getElementById('sD').addEventListener('input',update);
+update();
+</script>
+</body>
+</html>
