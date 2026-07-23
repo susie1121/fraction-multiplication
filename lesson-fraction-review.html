@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数乘法 · 整理和复习</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root{--p:#2563eb;--bg:#f8fafc;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--g:#10b981;--o:#f59e0b;--r:#e11d48}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;padding:32px 16px}
+  .wrap{max-width:880px;margin:0 auto}
+  h1{font-size:30px;font-weight:700;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,#2563eb,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{text-align:center;color:var(--m);font-size:15px;margin-bottom:36px}
+  .sec{background:var(--c);border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,.06);padding:32px 36px;margin-bottom:28px}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .sec-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0}
+  .sec-num.b{background:var(--p)}.sec-num.g{background:var(--g)}.sec-num.o{background:var(--o)}
+  .sec-title{font-size:20px;font-weight:700}
+  .top{display:flex;gap:32px;align-items:flex-start;margin-bottom:20px}
+  canvas{display:block;border-radius:12px;background:#f1f5f9;border:1px solid var(--b)}
+  .ctrl{flex:1;min-width:240px}
+  .cg{margin-bottom:20px}
+  .cg label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:600;margin-bottom:8px}
+  .cg label span{font-size:20px;font-weight:700;color:var(--p);font-variant-numeric:tabular-nums}
+  input[type="range"]{-webkit-appearance:none;width:100%;height:7px;border-radius:4px;background:#e2e8f0;outline:none;cursor:pointer}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--p);border:3px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,.3);cursor:grab}
+  .eq{text-align:center;padding:10px 0 4px}.eq .katex{font-size:1.35em}
+  hr{border:none;border-top:1px solid var(--b);margin:4px 0 16px}
+  .steps{background:#f8fafc;border-radius:12px;padding:18px 22px;margin-bottom:16px}
+  .steps h3{font-size:13px;font-weight:700;color:var(--m);margin-bottom:12px;letter-spacing:.5px}
+  .step{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:14px}.step:last-child{margin-bottom:0}
+  .sn{width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .step .katex{font-size:1.1em}
+  .note{background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:1px solid #bfdbfe;border-radius:12px;padding:14px 20px;margin-top:12px;font-size:14px;color:#1e40af;line-height:1.7}
+  .note strong{color:#1d4ed8}
+  @media(max-width:700px){.top{flex-direction:column;align-items:center}.sec{padding:24px 18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>分数乘法 · 整理和复习</h1>
+<p class="sub">一个数乘分数可以表示什么意思？怎样计算分数乘法？</p>
+
+<!-- ===== 第一部分：整数×分数 ===== -->
+<div class="sec">
+  <div class="sec-head"><div class="sec-num b">1</div><div class="sec-title">整数 × 分数的含义</div></div>
+  <div class="top">
+    <canvas id="c1" width="340" height="300"></canvas>
+    <div class="ctrl">
+      <div class="cg">
+        <label>整数：<span id="v1a">3</span></label>
+        <input type="range" id="s1a" min="1" max="8" value="3">
+      </div>
+      <div class="cg">
+        <label>分数：分子 <span id="v1n">2</span></label>
+        <input type="range" id="s1n" min="1" max="7" value="2">
+      </div>
+      <div class="cg">
+        <label>分数：分母 <span id="v1d">5</span></label>
+        <input type="range" id="s1d" min="2" max="8" value="5">
+      </div>
+      <hr>
+      <div class="eq" id="eq1"></div>
+    </div>
+  </div>
+  <div class="steps"><h3>含义理解</h3><div id="steps1"></div></div>
+  <div class="note"><strong>关键：</strong>整数乘分数 = 几个相同的分数相加，也可以理解为求这个整数的"几分之几"。</div>
+</div>
+
+<!-- ===== 第二部分：求一个数的几分之几 ===== -->
+<div class="sec">
+  <div class="sec-head"><div class="sec-num g">2</div><div class="sec-title">求一个数的几分之几</div></div>
+  <div class="top">
+    <canvas id="c2" width="340" height="300"></canvas>
+    <div class="ctrl">
+      <div class="cg">
+        <label>总数：<span id="v2a">12</span></label>
+        <input type="range" id="s2a" min="2" max="24" value="12">
+      </div>
+      <div class="cg">
+        <label>取几分之几：分子 <span id="v2n">3</span></label>
+        <input type="range" id="s2n" min="1" max="7" value="3">
+      </div>
+      <div class="cg">
+        <label>取几分之几：分母 <span id="v2d">4</span></label>
+        <input type="range" id="s2d" min="2" max="8" value="4">
+      </div>
+      <hr>
+      <div class="eq" id="eq2"></div>
+    </div>
+  </div>
+  <div class="steps"><h3>解题思路</h3><div id="steps2"></div></div>
+  <div class="note"><strong>关键：</strong>求一个数的几分之几 = 用这个数乘几分之几。</div>
+</div>
+
+<!-- ===== 第三部分：分数×分数 ===== -->
+<div class="sec">
+  <div class="sec-head"><div class="sec-num o">3</div><div class="sec-title">分数 × 分数的计算</div></div>
+  <div class="top">
+    <canvas id="c3" width="340" height="340"></canvas>
+    <div class="ctrl">
+      <div class="cg">
+        <label>第一个分数：分子 <span id="v3a">1</span></label>
+        <input type="range" id="s3a" min="1" max="7" value="1">
+      </div>
+      <div class="cg">
+        <label>第一个分数：分母 <span id="v3b">2</span></label>
+        <input type="range" id="s3b" min="2" max="8" value="2">
+      </div>
+      <div class="cg">
+        <label>第二个分数：分子 <span id="v3n">3</span></label>
+        <input type="range" id="s3n" min="1" max="7" value="3">
+      </div>
+      <div class="cg">
+        <label>第二个分数：分母 <span id="v3d">5</span></label>
+        <input type="range" id="s3d" min="2" max="8" value="5">
+      </div>
+      <hr>
+      <div class="eq" id="eq3"></div>
+    </div>
+  </div>
+  <div class="steps"><h3>计算步骤</h3><div id="steps3"></div></div>
+  <div class="note"><strong>关键：</strong>分数乘分数，分子乘分子，分母乘分母，能约分的要约分。</div>
+</div>
+
+</div>
+
+<script>
+function gcd(a,b){return b===0?a:gcd(b,a%b)}
+function render(el,t){try{katex.render(t,el,{throwOnError:false})}catch(e){el.textContent=t}}
+
+// ===== 第一部分：整数×分数 =====
+function draw1(a,n,d){
+  const cv=document.getElementById('c1'),ctx=cv.getContext('2d'),W=340,H=300;
+  ctx.clearRect(0,0,W,H);
+  const mx=20,my=30,gw=W-2*mx,cellW=40,cellH=40;
+  const cols=Math.floor(gw/cellW),rows=Math.ceil(a/cols);
+  for(let i=0;i<a;i++){
+    const x=mx+(i%cols)*cellW,y=my+Math.floor(i/cols)*cellH;
+    ctx.beginPath();ctx.roundRect(x+2,y+2,cellW-4,cellH-4,6);ctx.fillStyle='#dbeafe';ctx.fill();
+    ctx.strokeStyle='#3b82f6';ctx.lineWidth=1.5;ctx.stroke();
+    // divided into d parts
+    for(let j=1;j<d;j++){
+      const py=y+2+(cellH-4)*j/d;
+      ctx.beginPath();ctx.moveTo(x+2,py);ctx.lineTo(x+cellW-2,py);ctx.strokeStyle='#93c5fd';ctx.lineWidth=1;ctx.stroke();
+    }
+    // highlight n parts
+    const ph=(cellH-4)*n/d;
+    ctx.fillStyle='#3b82f6';ctx.globalAlpha=0.3;ctx.fillRect(x+2,y+2,cellW-4,ph);ctx.globalAlpha=1;
+  }
+  // legend
+  ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillStyle='#64748b';
+  const ly=my+rows*cellH+20;
+  ctx.fillText('每个方块取 '+n+'/'+d+'（蓝色部分）',mx,ly);
+  ctx.font='bold 14px sans-serif';ctx.fillStyle='#1e293b';
+  ctx.fillText('共 '+a+' 个方块，每块取 '+n+'/'+d+'，共取 '+a+'×'+n+'/'+d+'='+(a*n/d),mx,ly+22);
+  // bar at bottom
+  const by=ly+40,bh=24;
+  ctx.beginPath();ctx.roundRect(mx,by,gw,bh,6);ctx.fillStyle='#e2e8f0';ctx.fill();
+  const fw=gw*(a*n/d)/(a);
+  ctx.beginPath();ctx.roundRect(mx,by,fw,bh,6);ctx.fillStyle='#3b82f6';ctx.fill();
+  ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';
+  ctx.fillText((a*n/d)+'',mx+fw/2,by+bh/2+5);
+}
+
+function update1(){
+  const a=+document.getElementById('s1a').value;
+  let n=+document.getElementById('s1n').value,d=+document.getElementById('s1d').value;
+  if(n>=d){n=d-1;document.getElementById('s1n').value=n}
+  document.getElementById('v1a').textContent=a;
+  document.getElementById('v1n').textContent=n;
+  document.getElementById('v1d').textContent=d;
+  draw1(a,n,d);
+  render(document.getElementById('eq1'),'\\text{求 }'+a+'\\text{ 的 }\\frac{'+n+'}{'+d+'}\\text{ 是多少}');
+  let h='';
+  const s1=document.createElement('span');render(s1,'\\text{含义：'+a+' 个 }\\frac{'+n+'}{'+d+'}\\text{ 相加}');
+  h+='<div class="step"><span class="sn">1</span>'+s1.innerHTML+'</div>';
+  const s2=document.createElement('span');render(s2,a+'\\times\\frac{'+n+'}{'+d+'}=\\frac{'+a+'\\times'+n+'}{'+d+'}=\\frac{'+(a*n)+'}{'+d+'}');
+  h+='<div class="step"><span class="sn">2</span>'+s2.innerHTML+'</div>';
+  const g=gcd(a*n,d),num=a*n/g,den=d/g;
+  if(g>1){const s3=document.createElement('span');render(s3,'\\frac{'+(a*n)+'}{'+d+'}=\\frac{'+num+'}{'+den+'}');h+='<div class="step"><span class="sn">3</span>'+s3.innerHTML+'</div>'}
+  document.getElementById('steps1').innerHTML=h;
+}
+
+// ===== 第二部分：求一个数的几分之几 =====
+function draw2(a,n,d){
+  const cv=document.getElementById('c2'),ctx=cv.getContext('2d'),W=340,H=300;
+  ctx.clearRect(0,0,W,H);
+  const mx=20,my=30,cols=6,cw=44,ch=44,gap=4;
+  const rows=Math.ceil(a/cols);
+  for(let i=0;i<a;i++){
+    const x=mx+(i%cols)*(cw+gap),y=my+Math.floor(i/cols)*(ch+gap);
+    const taken=Math.floor(i*d/a)<n;
+    ctx.beginPath();ctx.roundRect(x,y,cw,ch,6);
+    ctx.fillStyle=taken?'#d1fae5':'#f1f5f9';ctx.fill();
+    ctx.strokeStyle=taken?'#10b981':'#cbd5e1';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillStyle=taken?'#065f46':'#94a3b8';
+    ctx.fillText(i+1,x+cw/2,y+ch/2+5);
+  }
+  const pick=Math.round(a*n/d);
+  const ly=my+rows*(ch+gap)+16;
+  ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillStyle='#64748b';
+  ctx.fillText(a+' 个中取 '+n+'/'+d+'（绿色），取 '+pick+' 个',mx,ly);
+  // bar
+  const by=ly+16,bh=22;
+  ctx.beginPath();ctx.roundRect(mx,by,280,bh,6);ctx.fillStyle='#e2e8f0';ctx.fill();
+  const fw=280*(n/d);
+  ctx.beginPath();ctx.roundRect(mx,by,fw,bh,6);ctx.fillStyle='#10b981';ctx.fill();
+  ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';
+  ctx.fillText(pick,mx+fw/2,by+bh/2+4);
+}
+
+function update2(){
+  const a=+document.getElementById('s2a').value;
+  let n=+document.getElementById('s2n').value,d=+document.getElementById('s2d').value;
+  if(n>=d){n=d-1;document.getElementById('s2n').value=n}
+  document.getElementById('v2a').textContent=a;
+  document.getElementById('v2n').textContent=n;
+  document.getElementById('v2d').textContent=d;
+  draw2(a,n,d);
+  render(document.getElementById('eq2'),'\\text{求 }'+a+'\\text{ 的 }\\frac{'+n+'}{'+d+'}');
+  let h='';
+  const s1=document.createElement('span');render(s1,'\\text{思路：求 }'+a+'\\text{ 的 }\\frac{'+n+'}{'+d+'}\\text{ 就是 }'+a+'\\times\\frac{'+n+'}{'+d+'}');
+  h+='<div class="step"><span class="sn">1</span>'+s1.innerHTML+'</div>';
+  const result=a*n/d;
+  const s2=document.createElement('span');render(s2,a+'\\times\\frac{'+n+'}{'+d+'}=\\frac{'+a+'\\times'+n+'}{'+d+'}=\\frac{'+(a*n)+'}{'+d+'}='+result);
+  h+='<div class="step"><span class="sn">2</span>'+s2.innerHTML+'</div>';
+  document.getElementById('steps2').innerHTML=h;
+}
+
+// ===== 第三部分：分数×分数 =====
+function draw3(a,b,n,d){
+  const cv=document.getElementById('c3'),ctx=cv.getContext('2d'),W=340,H=340;
+  ctx.clearRect(0,0,W,H);
+  const mx=30,my=30,gw=260,gh=260;
+  ctx.beginPath();ctx.roundRect(mx,my,gw,gh,4);ctx.fillStyle='#f1f5f9';ctx.fill();ctx.strokeStyle='#94a3b8';ctx.lineWidth=1;ctx.stroke();
+  // rows
+  const rowH=gh/b;
+  for(let i=1;i<b;i++){ctx.beginPath();ctx.moveTo(mx,my+i*rowH);ctx.lineTo(mx+gw,my+i*rowH);ctx.strokeStyle='#cbd5e1';ctx.lineWidth=1;ctx.stroke()}
+  // highlight a rows
+  const plotH=rowH*a;
+  ctx.fillStyle='#fbbf24';ctx.globalAlpha=0.35;ctx.fillRect(mx,my,gw,plotH);ctx.globalAlpha=1;
+  ctx.strokeStyle='#f59e0b';ctx.lineWidth=2;ctx.strokeRect(mx,my,gw,plotH);
+  // columns
+  const colW=gw/d;
+  for(let i=1;i<d;i++){ctx.beginPath();ctx.moveTo(mx+i*colW,my);ctx.lineTo(mx+i*colW,my+gh);ctx.strokeStyle='#cbd5e1';ctx.lineWidth=1;ctx.stroke()}
+  // highlight n columns in plot
+  const pickW=colW*n;
+  ctx.fillStyle='#f97316';ctx.globalAlpha=0.5;ctx.fillRect(mx,my,pickW,plotH);ctx.globalAlpha=1;
+  ctx.strokeStyle='#ea580c';ctx.lineWidth=2;ctx.strokeRect(mx,my,pickW,plotH);
+  // labels
+  ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillStyle='#1e293b';
+  ctx.fillText(a+'/'+b+'（黄色行）',mx+gw/2,my+gh+20);
+  ctx.fillText('× '+n+'/'+d+'（橙色列重叠）',mx+gw/2,my+gh+38);
+  // result bar
+  const by=my+gh+54,bh=24;
+  ctx.beginPath();ctx.roundRect(mx,by,gw,bh,6);ctx.fillStyle='#e2e8f0';ctx.fill();
+  const val=a*n/b/d;
+  const fw=gw*val;
+  ctx.beginPath();ctx.roundRect(mx,by,fw,bh,6);ctx.fillStyle='#f97316';ctx.fill();
+  ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';
+  ctx.fillText(a+'×'+n+'='+(a*n)+' / '+b+'×'+d+'='+(b*d),mx+fw/2,by+bh/2+5);
+}
+
+function update3(){
+  let a=+document.getElementById('s3a').value,b=+document.getElementById('s3b').value;
+  let n=+document.getElementById('s3n').value,d=+document.getElementById('s3d').value;
+  if(a>=b){a=b-1;document.getElementById('s3a').value=a}
+  if(n>=d){n=d-1;document.getElementById('s3n').value=n}
+  document.getElementById('v3a').textContent=a;document.getElementById('v3b').textContent=b;
+  document.getElementById('v3n').textContent=n;document.getElementById('v3d').textContent=d;
+  draw3(a,b,n,d);
+  render(document.getElementById('eq3'),'\\frac{'+a+'}{'+b+'}\\times\\frac{'+n+'}{'+d+'}');
+  const num=a*n,den=b*d,g=gcd(num,den),sN=num/g,sD=den/g,can=g>1;
+  let h='';
+  const s1=document.createElement('span');render(s1,'\\frac{'+a+'}{'+b+'}\\times\\frac{'+n+'}{'+d+'}=\\frac{'+a+'\\times'+n+'}{'+b+'\\times'+d+'}=\\frac{'+num+'}{'+den+'}');
+  h+='<div class="step"><span class="sn">1</span>'+s1.innerHTML+'</div>';
+  if(can){const s2=document.createElement('span');render(s2,'\\text{约分：}\\frac{'+num+'}{'+den+'}=\\frac{'+sN+'}{'+sD+'}');h+='<div class="step"><span class="sn">2</span>'+s2.innerHTML+'</div>'}
+  document.getElementById('steps3').innerHTML=h;
+}
+
+['s1a','s1n','s1d'].forEach(id=>document.getElementById(id).addEventListener('input',update1));
+['s2a','s2n','s2d'].forEach(id=>document.getElementById(id).addEventListener('input',update2));
+['s3a','s3b','s3n','s3d'].forEach(id=>document.getElementById(id).addEventListener('input',update3));
+update1();update2();update3();
+</script>
+</body>
+</html>
