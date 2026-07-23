@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>位置与方向 · 台风问题</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root{--p:#0891b2;--bg:#f0fdfa;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--r:#dc2626}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+  h1{font-size:26px;font-weight:700;margin-bottom:6px;background:linear-gradient(135deg,#0891b2,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:14px;color:var(--m);margin-bottom:24px}
+  .card{background:var(--c);border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,.07);padding:28px 32px;max-width:880px;width:100%}
+  .problem{background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border-radius:12px;padding:16px 20px;margin-bottom:22px;border-left:4px solid #0d9488}
+  .problem h3{font-size:14px;color:#0d9488;margin-bottom:8px}
+  .problem p{font-size:14px;line-height:1.8}
+  .top{display:flex;gap:28px;align-items:flex-start;margin-bottom:20px}
+  canvas{display:block;border-radius:14px;background:#f8fafc;border:1px solid var(--b)}
+  .ctrl{flex:1;min-width:240px}
+  .cg{margin-bottom:18px}
+  .cg label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:600;margin-bottom:7px}
+  .cg label span{font-size:19px;font-weight:700;color:var(--p);font-variant-numeric:tabular-nums}
+  input[type="range"]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:#ccfbf1;outline:none;cursor:pointer}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--p);border:3px solid #fff;box-shadow:0 2px 8px rgba(8,145,178,.3);cursor:grab}
+  .eq{text-align:center;padding:8px 0 4px}.eq .katex{font-size:1.3em}
+  hr{border:none;border-top:1px solid var(--b);margin:4px 0 14px}
+  .steps{background:#f8fafc;border-radius:10px;padding:14px 18px;margin-bottom:12px}
+  .steps h3{font-size:12px;font-weight:700;color:var(--m);margin-bottom:8px;letter-spacing:.5px}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:13px}.step:last-child{margin-bottom:0}
+  .sn{width:20px;height:20px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+  .step .katex{font-size:1.05em}
+  .ans{background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border:2px solid #99f6e4;border-radius:12px;padding:16px 22px;text-align:center;margin-bottom:12px}
+  .ans .katex{font-size:1.4em}
+  .note{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;font-size:13px;color:#92400e;line-height:1.6}
+  .note strong{color:#b45309}
+  @media(max-width:700px){.top{flex-direction:column;align-items:center}.card{padding:22px 18px}}
+</style>
+</head>
+<body>
+
+<h1>位置与方向 · 台风问题</h1>
+<p class="sub">探索方向角与距离的含义</p>
+
+<div data-gif-frames='{"sliderIds":["sAngle","sDist","sSpeed"],"values":[[30,600,20],[45,500,25],[60,700,15],[30,600,20],[15,800,30],[45,600,20],[30,600,20]]}'>
+<div class="card">
+  <div class="problem">
+    <h3>第1题</h3>
+    <p>目前台风中心位于A市<strong>东偏南 30°</strong>方向、距离A市 <strong>600 km</strong> 的海面上，正以 <strong>20 千米/时</strong> 的速度沿直线向A市移动。</p>
+  </div>
+
+  <div class="top">
+    <canvas id="c" width="380" height="380"></canvas>
+    <div class="ctrl">
+      <div class="cg">
+        <label>方向角：东偏南 <span id="vAngle">30</span>°</label>
+        <input type="range" id="sAngle" min="5" max="85" value="30">
+      </div>
+      <div class="cg">
+        <label>距离：<span id="vDist">600</span> km</label>
+        <input type="range" id="sDist" min="100" max="1000" value="600" step="50">
+      </div>
+      <div class="cg">
+        <label>速度：<span id="vSpeed">20</span> km/h</label>
+        <input type="range" id="sSpeed" min="5" max="50" value="20">
+      </div>
+      <hr>
+      <div class="eq" id="eq1"></div>
+    </div>
+  </div>
+
+  <div class="steps"><h3>解题步骤</h3><div id="steps"></div></div>
+  <div class="ans" id="answer"></div>
+  <div class="note"><strong>关键概念：</strong>"东偏南 30°" 表示从正东方向向南偏转 30°。确定位置需要两个条件：方向和距离。</div>
+</div>
+</div>
+
+<script>
+function render(el,t){try{katex.render(t,el,{throwOnError:false})}catch(e){el.textContent=t}}
+
+function draw(angle,dist,speed){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=380,H=380;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,scale=0.4;
+
+  // Grid circles
+  ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;
+  for(let r=100;r<=200;r+=100){
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+  }
+
+  // Compass axes
+  ctx.strokeStyle='#94a3b8';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(cx,cy-180);ctx.lineTo(cx,cy+180);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx-180,cy);ctx.lineTo(cx+180,cy);ctx.stroke();
+
+  // Labels
+  ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='#1e293b';
+  ctx.fillText('北',cx,cy-190);ctx.fillText('南',cx,cy+195);
+  ctx.fillText('西',cx-195,cy);ctx.fillText('东',cx+195,cy);
+  ctx.font='13px sans-serif';ctx.fillStyle='#64748b';
+  ctx.fillText('A市',cx+12,cy-12);
+
+  // Scale bar
+  ctx.fillStyle='#64748b';ctx.font='11px sans-serif';ctx.textAlign='left';
+  ctx.fillText('100 km',12,H-12);
+  ctx.strokeStyle='#64748b';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(12,H-20);ctx.lineTo(52,H-20);ctx.stroke();
+
+  // Angle arc
+  const rad=angle*Math.PI/180;
+  ctx.beginPath();ctx.arc(cx,cy,50,0,rad);ctx.strokeStyle='#f59e0b';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='12px sans-serif';ctx.fillStyle='#f59e0b';ctx.textAlign='left';
+  ctx.fillText(angle+'°',cx+54,cy+18);
+
+  // Direction line
+  const lineLen=dist*scale;
+  const tx=cx+lineLen*Math.cos(rad);
+  const ty=cy+lineLen*Math.sin(rad);
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(tx,ty);
+  ctx.strokeStyle='#dc2626';ctx.lineWidth=2.5;ctx.stroke();
+
+  // Typhoon marker
+  ctx.beginPath();ctx.arc(tx,ty,14,0,Math.PI*2);
+  ctx.fillStyle='#dc2626';ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='bold 11px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🌀',tx,ty);
+
+  // Distance label
+  const mx=(cx+tx)/2,my=(cy+ty)/2;
+  ctx.save();ctx.translate(mx,my);ctx.rotate(rad/2);
+  ctx.font='bold 13px sans-serif';ctx.fillStyle='#dc2626';ctx.textAlign='center';
+  ctx.fillText(dist+' km',0,-10);
+  ctx.restore();
+
+  // Time to arrive
+  const hours=dist/speed;
+  const h=Math.floor(hours),m=Math.round((hours-h)*60);
+  ctx.font='13px sans-serif';ctx.fillStyle='#1e293b';ctx.textAlign='center';
+  ctx.fillText('预计 '+h+' 小时 '+m+' 分钟后到达A市',cx,H-12);
+}
+
+function update(){
+  const angle=+document.getElementById('sAngle').value;
+  const dist=+document.getElementById('sDist').value;
+  const speed=+document.getElementById('sSpeed').value;
+  document.getElementById('vAngle').textContent=angle;
+  document.getElementById('vDist').textContent=dist;
+  document.getElementById('vSpeed').textContent=speed;
+  draw(angle,dist,speed);
+
+  render(document.getElementById('eq1'),'\\text{东偏南 }'+angle+'^\\circ\\text{，距离 }'+dist+'\\text{ km}');
+
+  const hours=dist/speed;
+  const h=Math.floor(hours),m=Math.round((hours-h)*60);
+
+  let s='';
+  const s1=document.createElement('span');render(s1,'\\text{① 方向：东偏南 }'+angle+'^\\circ');
+  s+='<div class="step"><span class="sn">1</span>'+s1.innerHTML+'</div>';
+  const s2=document.createElement('span');render(s2,'\\text{② 距离：}'+dist+'\\text{ km}');
+  s+='<div class="step"><span class="sn">2</span>'+s2.innerHTML+'</div>';
+  const s3=document.createElement('span');render(s3,'\\text{③ 时间：}'+dist+'\\div'+speed+'='+hours.toFixed(1)+'\\text{ 时}');
+  s+='<div class="step"><span class="sn">3</span>'+s3.innerHTML+'</div>';
+  document.getElementById('steps').innerHTML=s;
+
+  const aEl=document.getElementById('answer');
+  const a2=document.createElement('span');
+  render(a2,'\\boxed{\\text{台风在东偏南 }'+angle+'^\\circ\\text{，}'+dist+'\\text{ km 处，约 }'+h+'\\text{ 时 }'+m+'\\text{ 分到达}}');
+  aEl.innerHTML=a2.innerHTML;
+}
+
+['sAngle','sDist','sSpeed'].forEach(id=>document.getElementById(id).addEventListener('input',update));
+update();
+</script>
+</body>
+</html>
