@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>位置与方向 · 标注位置</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root{--p:#0891b2;--bg:#f0fdfa;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+  h1{font-size:24px;font-weight:700;margin-bottom:6px;background:linear-gradient(135deg,#0891b2,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:13px;color:var(--m);margin-bottom:20px}
+  .card{background:var(--c);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.06);padding:24px 28px;max-width:900px;width:100%}
+  .problem{background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border-radius:10px;padding:14px 18px;margin-bottom:18px;border-left:4px solid #0d9488}
+  .problem h3{font-size:13px;color:#0d9488;margin-bottom:6px}
+  .problem p{font-size:13px;line-height:1.7}
+  .top{display:flex;gap:24px;align-items:flex-start;margin-bottom:16px}
+  canvas{display:block;border-radius:12px;background:#f8fafc;border:1px solid var(--b)}
+  .ctrl{flex:1;min-width:280px}
+  .loc{margin-bottom:14px;padding:12px;border-radius:10px;background:#f8fafc;border-left:3px solid var(--c)}
+  .loc.l1{border-color:#dc2626}.loc.l2{border-color:#2563eb}.loc.l3{border-color:#16a34a}.loc.l4{border-color:#f59e0b}
+  .loc-title{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .loc-title .dot{width:10px;height:10px;border-radius:50%}
+  .loc.l1 .dot{background:#dc2626}.loc.l2 .dot{background:#2563eb}.loc.l3 .dot{background:#16a34a}.loc.l4 .dot{background:#f59e0b}
+  .row{display:flex;gap:10px;margin-bottom:6px}
+  .row label{font-size:11px;font-weight:600;color:var(--m);display:flex;align-items:center;gap:4px}
+  .row label span{font-size:14px;font-weight:700;color:var(--p)}
+  input[type="range"]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:#e2e8f0;outline:none;cursor:pointer}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--p);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:grab}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11px}
+  .legend-item{display:flex;align-items:center;gap:4px}
+  .legend-dot{width:8px;height:8px;border-radius:50%}
+  .steps{background:#f8fafc;border-radius:10px;padding:12px 16px;margin-bottom:10px}
+  .steps h3{font-size:11px;font-weight:700;color:var(--m);margin-bottom:6px;letter-spacing:.5px}
+  .step{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px}.step:last-child{margin-bottom:0}
+  .sn{width:18px;height:18px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+  .step .katex{font-size:1em}
+  .note{background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:8px 14px;font-size:12px;color:#92400e;line-height:1.5}
+  @media(max-width:700px){.top{flex-direction:column;align-items:center}.card{padding:20px 16px}}
+</style>
+</head>
+<body>
+
+<h1>位置与方向 · 标注位置</h1>
+<p class="sub">在平面图上标出各场所的位置</p>
+
+<div data-gif-frames='{"sliderIds":["s1a","s1d","s2a","s2d","s3a","s3d","s4a","s4d"],"values":[[45,1000,30,2500,20,2000,40,1500],[60,1200,45,2000,30,1800,30,1800],[45,1000,30,2500,20,2000,40,1500],[45,1000,30,2500,20,2000,40,1500]]}'>
+<div class="card">
+  <div class="problem">
+    <h3>第7题</h3>
+    <p>根据下面的描述，在平面图上标出各场所的位置。<br>
+    （1）文化广场在电视塔的北偏东45°方向1km处。<br>
+    （2）体育场在电视塔的西偏南30°方向2.5km处。<br>
+    （3）博物馆在电视塔的西偏北20°方向2km处。<br>
+    （4）动物园在电视塔的东偏北40°方向1.5km处。</p>
+  </div>
+
+  <div class="top">
+    <canvas id="c" width="340" height="340"></canvas>
+    <div class="ctrl">
+      <div class="loc l1">
+        <div class="loc-title"><div class="dot"></div>文化广场</div>
+        <div class="row"><label>北偏东 <span id="v1a">45</span>°</label><input type="range" id="s1a" min="5" max="85" value="45"></div>
+        <div class="row"><label>距离 <span id="v1d">1000</span> m</label><input type="range" id="s1d" min="200" max="3000" value="1000" step="100"></div>
+      </div>
+      <div class="loc l2">
+        <div class="loc-title"><div class="dot"></div>体育场</div>
+        <div class="row"><label>西偏南 <span id="v2a">30</span>°</label><input type="range" id="s2a" min="5" max="85" value="30"></div>
+        <div class="row"><label>距离 <span id="v2d">2500</span> m</label><input type="range" id="s2d" min="200" max="3000" value="2500" step="100"></div>
+      </div>
+      <div class="loc l3">
+        <div class="loc-title"><div class="dot"></div>博物馆</div>
+        <div class="row"><label>西偏北 <span id="v3a">20</span>°</label><input type="range" id="s3a" min="5" max="85" value="20"></div>
+        <div class="row"><label>距离 <span id="v3d">2000</span> m</label><input type="range" id="s3d" min="200" max="3000" value="2000" step="100"></div>
+      </div>
+      <div class="loc l4">
+        <div class="loc-title"><div class="dot"></div>动物园</div>
+        <div class="row"><label>东偏北 <span id="v4a">40</span>°</label><input type="range" id="s4a" min="5" max="85" value="40"></div>
+        <div class="row"><label>距离 <span id="v4d">1500</span> m</label><input type="range" id="s4d" min="200" max="3000" value="1500" step="100"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>文化广场</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div>体育场</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>博物馆</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>动物园</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps"><h3>标注步骤</h3><div id="steps"></div></div>
+  <div class="note"><strong>方法：</strong>先确定方向（角度），再根据比例尺量出距离，最后用圆点标出位置。</div>
+</div>
+</div>
+
+<script>
+function render(el,t){try{katex.render(t,el,{throwOnError:false})}catch(e){el.textContent=t}}
+
+function draw(a1,d1,a2,d2,a3,d3,a4,d4){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=340,H=340;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,scale=0.1;
+
+  // Grid circles (500m intervals)
+  ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;
+  for(let r=50;r<=150;r+=50){
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.font='8px sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='left';
+  ctx.fillText('500m',cx+2,cy-50-2);ctx.fillText('1km',cx+2,cy-100-2);ctx.fillText('1.5km',cx+2,cy-150-2);
+
+  // Compass axes
+  ctx.strokeStyle='#94a3b8';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(cx,cy-165);ctx.lineTo(cx,cy+165);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx-165,cy);ctx.lineTo(cx+165,cy);ctx.stroke();
+
+  // Labels
+  ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='#1e293b';
+  ctx.fillText('北',cx,cy-175);ctx.fillText('南',cx,cy+178);
+  ctx.fillText('西',cx-178,cy);ctx.fillText('东',cx+178,cy);
+  ctx.font='12px sans-serif';ctx.fillStyle='#64748b';
+  ctx.fillText('电视塔',cx+12,cy+14);
+
+  // Scale bar
+  ctx.fillStyle='#64748b';ctx.font='9px sans-serif';ctx.textAlign='left';
+  ctx.fillText('500m',6,H-6);
+  ctx.strokeStyle='#64748b';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(6,H-14);ctx.lineTo(56,H-14);ctx.stroke();
+
+  // Draw each location
+  const locations=[
+    {angle:a1,dist:d1,color:'#dc2626',label:'文化广场',offset:1},
+    {angle:a2,dist:d2,color:'#2563eb',label:'体育场',offset:1.5},
+    {angle:a3,dist:d3,color:'#16a34a',label:'博物馆',offset:1.2},
+    {angle:a4,dist:d4,color:'#f59e0b',label:'动物园',offset:1.3}
+  ];
+
+  locations.forEach((loc,i)=>{
+    let px,py;
+    if(i===0){// 北偏东
+      px=cx+loc.dist*scale*Math.sin(loc.angle*Math.PI/180);
+      py=cy-loc.dist*scale*Math.cos(loc.angle*Math.PI/180);
+    }else if(i===1){// 西偏南
+      px=cx-loc.dist*scale*Math.cos(loc.angle*Math.PI/180);
+      py=cy+loc.dist*scale*Math.sin(loc.angle*Math.PI/180);
+    }else if(i===2){// 西偏北
+      px=cx-loc.dist*scale*Math.cos(loc.angle*Math.PI/180);
+      py=cy-loc.dist*scale*Math.sin(loc.angle*Math.PI/180);
+    }else{// 东偏北
+      px=cx+loc.dist*scale*Math.cos(loc.angle*Math.PI/180);
+      py=cy-loc.dist*scale*Math.sin(loc.angle*Math.PI/180);
+    }
+
+    // Line from center
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);
+    ctx.strokeStyle=loc.color;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+
+    // Marker
+    ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fillStyle=loc.color;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+
+    // Label
+    const lx=px+loc.offset*(px>cx?8:-8);
+    const ly=py+loc.offset*(py>cy?12:-8);
+    ctx.font='bold 10px sans-serif';ctx.fillStyle=loc.color;ctx.textAlign=px>cx?'left':'right';
+    ctx.fillText(loc.label,lx,ly);
+    ctx.font='9px sans-serif';ctx.fillStyle='#64748b';
+    ctx.fillText(loc.dist+'m',lx,ly+12);
+  });
+}
+
+function update(){
+  const a1=+document.getElementById('s1a').value,d1=+document.getElementById('s1d').value;
+  const a2=+document.getElementById('s2a').value,d2=+document.getElementById('s2d').value;
+  const a3=+document.getElementById('s3a').value,d3=+document.getElementById('s3d').value;
+  const a4=+document.getElementById('s4a').value,d4=+document.getElementById('s4d').value;
+  document.getElementById('v1a').textContent=a1;document.getElementById('v1d').textContent=d1;
+  document.getElementById('v2a').textContent=a2;document.getElementById('v2d').textContent=d2;
+  document.getElementById('v3a').textContent=a3;document.getElementById('v3d').textContent=d3;
+  document.getElementById('v4a').textContent=a4;document.getElementById('v4d').textContent=d4;
+  draw(a1,d1,a2,d2,a3,d3,a4,d4);
+
+  let s='';
+  const labels=['文化广场','体育场','博物馆','动物园'];
+  const dirs=['北偏东','西偏南','西偏北','东偏北'];
+  const angles=[a1,a2,a3,a4];
+  const dists=[d1,d2,d3,d4];
+  for(let i=0;i<4;i++){
+    const el=document.createElement('span');
+    render(el,'\\text{('+(i+1)+') '+labels[i]+'：'+dirs[i]+' }'+angles[i]+'^\\circ\\text{，}'+dists[i]+'\\text{ m}');
+    s+='<div class="step"><span class="sn">'+(i+1)+'</span>'+el.innerHTML+'</div>';
+  }
+  document.getElementById('steps').innerHTML=s;
+}
+
+['s1a','s1d','s2a','s2d','s3a','s3d','s4a','s4d'].forEach(id=>document.getElementById(id).addEventListener('input',update));
+update();
+</script>
+</body>
+</html>
