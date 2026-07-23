@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>心跳问题 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root{--p:#e11d48;--bg:#fff5f5;--c:#fff;--t:#1e293b;--m:#64748b;--b:#e2e8f0;--accent:#f43f5e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px}
+  h1{font-size:28px;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,#e11d48,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:15px;color:var(--m);margin-bottom:32px}
+  .card{background:var(--c);border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:36px 40px;max-width:860px;width:100%}
+  .problem{background:linear-gradient(135deg,#fff1f2,#fef3c7);border-radius:14px;padding:20px 24px;margin-bottom:28px;border-left:4px solid var(--accent)}
+  .problem h3{font-size:16px;color:var(--accent);margin-bottom:10px}
+  .problem p{font-size:15px;line-height:1.8}
+  .top{display:flex;gap:40px;align-items:flex-start;margin-bottom:32px}
+  canvas{display:block;border-radius:16px;background:#fef2f2}
+  .ctrl{flex:1;min-width:280px}
+  .cg{margin-bottom:24px}
+  .cg label{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;font-weight:600;margin-bottom:10px}
+  .cg label span{font-size:22px;font-weight:700;color:var(--p);font-variant-numeric:tabular-nums}
+  input[type="range"]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;background:#fecdd3;outline:none;cursor:pointer}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--p);border:3px solid #fff;box-shadow:0 2px 8px rgba(225,29,72,.3);cursor:grab}
+  .eq{text-align:center;padding:12px 0 4px}.eq .katex{font-size:1.4em}
+  hr{border:none;border-top:1px solid var(--b);margin:4px 0 20px}
+  .methods{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  .method{background:#f8fafc;border-radius:14px;padding:20px;border:2px solid transparent;transition:border-color .2s}
+  .method.active{border-color:var(--p)}
+  .method h4{font-size:14px;color:var(--m);margin-bottom:12px;font-weight:600}
+  .method .step{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:14px}.method .step:last-child{margin-bottom:0}
+  .sn{width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .method .katex{font-size:1.1em}
+  .ans{background:linear-gradient(135deg,#fff1f2,#fef3c7);border:2px solid #fecdd3;border-radius:14px;padding:20px 28px;text-align:center}
+  .ans .katex{font-size:1.6em}
+  .verify{background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;padding:16px 24px;margin-top:16px;text-align:center}
+  .verify h4{color:#16a34a;font-size:14px;margin-bottom:8px}
+  .verify .katex{font-size:1.2em}
+  @media(max-width:700px){.top{flex-direction:column;align-items:center}.methods{grid-template-columns:1fr}.card{padding:24px 20px}}
+</style>
+</head>
+<body>
+
+<h1>心跳问题 · 交互演示</h1>
+<p class="sub">拖动滑块，探索分数乘法在生活中的应用</p>
+
+<div data-gif-frames='{"sliderIds":["sA","sN","sD"],"values":[[75,4,5],[60,3,4],[80,2,3],[70,5,6],[90,1,2],[75,4,5]]}'>
+<div class="card">
+  <div class="problem">
+    <h3>第9题</h3>
+    <p>人心脏每分钟跳动的次数因年龄而不同。青少年每分钟心跳约 <strong id="qA">75</strong> 次，婴儿每分钟心跳的次数比青少年多 <strong id="qFrac"><span id="qN">4</span>/<span id="qD">5</span></strong>。婴儿每分钟心跳约多少次？</p>
+  </div>
+
+  <div class="top">
+    <canvas id="c" width="360" height="480"></canvas>
+    <div class="ctrl">
+      <div class="cg">
+        <label>青少年心跳：每分钟 <span id="vA">75</span> 次</label>
+        <input type="range" id="sA" min="40" max="120" value="75" step="5">
+      </div>
+      <div class="cg">
+        <label>多的比例：分子 <span id="vN">4</span></label>
+        <input type="range" id="sN" min="1" max="9" value="4">
+      </div>
+      <div class="cg">
+        <label>多的比例：分母 <span id="vD">5</span></label>
+        <input type="range" id="sD" min="2" max="10" value="5">
+      </div>
+      <hr>
+      <div class="eq" id="eq1"></div>
+    </div>
+  </div>
+
+  <div class="methods">
+    <div class="method" id="m1">
+      <h4>方法一：先求多的次数</h4>
+      <div id="steps1"></div>
+    </div>
+    <div class="method" id="m2">
+      <h4>方法二：直接求倍数</h4>
+      <div id="steps2"></div>
+    </div>
+  </div>
+
+  <div class="ans" id="answer"></div>
+
+  <div class="verify">
+    <h4>回顾与反思</h4>
+    <div id="verifyEq"></div>
+  </div>
+</div>
+</div>
+
+<script>
+function render(el,t){try{katex.render(t,el,{throwOnError:false})}catch(e){el.textContent=t}}
+
+function draw(a,n,d){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+  ctx.clearRect(0,0,W,H);
+
+  const extra=a*n/d;
+  const total=a+extra;
+  const maxH=140, barW=100, gap=40;
+  const teenH=maxH*(a/total);
+  const babyH=maxH*(total/total);
+  const startX=(W-2*barW-gap)/2;
+
+  // Teenager bar
+  const ty=80+maxH-teenH;
+  ctx.beginPath();ctx.roundRect(startX,ty,barW,teenH,8);ctx.fillStyle='#93c5fd';ctx.fill();
+  ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillStyle='#1d4ed8';
+  ctx.fillText('青少年',startX+barW/2,ty-30);
+  ctx.font='bold 20px sans-serif';ctx.fillText(Math.round(a)+'次',startX+barW/2,ty-8);
+  ctx.font='12px sans-serif';ctx.fillStyle='#64748b';
+  ctx.fillText('每分钟',startX+barW/2,ty+teenH+18);
+
+  // Baby bar
+  const by=80+maxH-babyH;
+  ctx.beginPath();ctx.roundRect(startX+barW+gap,by,barW,babyH,8);ctx.fillStyle='#fecdd3';ctx.fill();
+  ctx.strokeStyle='#e11d48';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillStyle='#be123c';
+  ctx.fillText('婴儿',startX+barW+gap+barW/2,by-30);
+  ctx.font='bold 20px sans-serif';ctx.fillText(Math.round(total)+'次',startX+barW+gap+barW/2,by-8);
+  ctx.font='12px sans-serif';ctx.fillStyle='#64748b';
+  ctx.fillText('每分钟',startX+barW+gap+barW/2,by+babyH+18);
+
+  // Arrow for extra
+  const arrowX1=startX+barW+4;
+  const arrowX2=startX+barW+gap-4;
+  const arrowY=by+10;
+  ctx.beginPath();ctx.moveTo(arrowX1,arrowY);ctx.lineTo(arrowX2,arrowY);
+  ctx.strokeStyle='#f97316';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(arrowX2-6,arrowY-4);ctx.lineTo(arrowX2,arrowY);ctx.lineTo(arrowX2-6,arrowY+4);
+  ctx.fillStyle='#f97316';ctx.fill();
+  ctx.font='bold 12px sans-serif';ctx.fillStyle='#f97316';ctx.textAlign='center';
+  ctx.fillText('多'+n+'/'+d,(arrowX1+arrowX2)/2,arrowY-10);
+
+  // Bottom explanation
+  ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillStyle='#1e293b';
+  ctx.fillText('多的部分 = '+Math.round(a)+' × '+n+'/'+d+' = '+Math.round(extra),W/2,by+babyH+45);
+  ctx.font='bold 16px sans-serif';ctx.fillStyle='#e11d48';
+  ctx.fillText('婴儿 = '+Math.round(a)+' + '+Math.round(extra)+' = '+Math.round(total)+' 次/分钟',W/2,by+babyH+70);
+}
+
+function update(){
+  const a=+document.getElementById('sA').value;
+  let n=+document.getElementById('sN').value;
+  let d=+document.getElementById('sD').value;
+  if(n>=d){document.getElementById('sN').value=d-1;n=d-1}
+
+  document.getElementById('vA').textContent=a;
+  document.getElementById('vN').textContent=n;
+  document.getElementById('vD').textContent=d;
+  document.getElementById('qA').textContent=a;
+  document.getElementById('qN').textContent=n;
+  document.getElementById('qD').textContent=d;
+
+  draw(a,n,d);
+
+  const extra=a*n/d;
+  const total=a+extra;
+
+  render(document.getElementById('eq1'),'\\text{已知：青少年 }'+a+'\\text{ 次/分，多 }\\frac{'+n+'}{'+d+'}');
+
+  // Method 1
+  let h1='';
+  const s1a=document.createElement('span');render(s1a,'\\text{① 多的次数：}'+a+'\\times\\frac{'+n+'}{'+d+'}='+Math.round(extra));
+  h1+='<div class="step"><span class="sn">1</span>'+s1a.innerHTML+'</div>';
+  const s1b=document.createElement('span');render(s1b,'\\text{② 婴儿心跳：}'+a+'+'+Math.round(extra)+'='+Math.round(total));
+  h1+='<div class="step"><span class="sn">2</span>'+s1b.innerHTML+'</div>';
+  document.getElementById('steps1').innerHTML=h1;
+
+  // Method 2
+  let h2='';
+  const s2a=document.createElement('span');render(s2a,'\\text{① 倍数关系：}1+\\frac{'+n+'}{'+d+'}=\\frac{'+(d+n)+'}{'+d+'}');
+  h2+='<div class="step"><span class="sn">1</span>'+s2a.innerHTML+'</div>';
+  const s2b=document.createElement('span');render(s2b,'\\text{② 婴儿心跳：}'+a+'\\times\\frac{'+(d+n)+'}{'+d+'}='+Math.round(total));
+  h2+='<div class="step"><span class="sn">2</span>'+s2b.innerHTML+'</div>';
+  document.getElementById('steps2').innerHTML=h2;
+
+  // Answer
+  const ans=document.getElementById('answer');
+  const aEl=document.createElement('span');
+  render(aEl,'\\boxed{\\text{婴儿每分钟心跳约 }'+Math.round(total)+'\\text{ 次}}');
+  ans.innerHTML=aEl.innerHTML;
+
+  // Verify
+  const vEl=document.getElementById('verifyEq');
+  const v1=document.createElement('span');
+  render(v1,'('+Math.round(total)+'-'+a+')\\div'+a+'='+(total-a)+'\\div'+a+'=\\frac{'+n+'}{'+d+'}');
+  vEl.innerHTML=v1.innerHTML;
+}
+
+document.getElementById('sA').addEventListener('input',update);
+document.getElementById('sN').addEventListener('input',update);
+document.getElementById('sD').addEventListener('input',update);
+update();
+</script>
+</body>
+</html>
