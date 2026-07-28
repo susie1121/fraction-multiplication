@@ -1,0 +1,493 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数除法应用3 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .main-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    max-width: 860px;
+    width: 100%;
+  }
+  .top-section {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    border-radius: 16px;
+    background: #f1f5f9;
+  }
+  .controls {
+    flex: 1;
+    min-width: 260px;
+  }
+  .control-group {
+    margin-bottom: 24px;
+  }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .control-group label span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  .fraction-display {
+    text-align: center;
+    padding: 16px 0 4px;
+  }
+  .fraction-display .katex { font-size: 1.5em; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 20px;
+  }
+  .steps-section {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .steps-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step .katex { font-size: 1.2em; }
+  .compare-section {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .compare-card {
+    flex: 1;
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .compare-card.m1 {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 2px solid #93c5fd;
+  }
+  .compare-card.m2 {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #fcd34d;
+  }
+  .compare-card h4 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .compare-card.m1 h4 { color: #1d4ed8; }
+  .compare-card.m2 h4 { color: #b45309; }
+  .compare-card .katex { font-size: 1.2em; }
+  .verify-card {
+    background: linear-gradient(135deg, #dcfce7, #d1fae5);
+    border: 2px solid #22c55e;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .verify-card h4 {
+    font-size: 14px;
+    color: #16a34a;
+    margin-bottom: 10px;
+  }
+  .verify-card .katex { font-size: 1.3em; }
+  .answer-card {
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    border: 2px solid #a78bfa;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .answer-card .katex { font-size: 1.5em; }
+  @media (max-width: 700px) {
+    .top-section { flex-direction: column; align-items: center; }
+    .controls { width: 100%; }
+    .main-card { padding: 24px 20px; }
+    .compare-section { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<h1>分数除法应用3 · 交互演示</h1>
+<p class="subtitle">已知水分重量和占比，求体重</p>
+
+<div class="main-card">
+  <div class="top-section">
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="340" height="340"></canvas>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>水分占体重的几分之几（分母）<span id="vDen">5</span></label>
+        <input type="range" id="sDen" min="2" max="10" value="5">
+      </div>
+      <div class="control-group">
+        <label>小明体内水分重（kg）<span id="vWater">28</span></label>
+        <input type="range" id="sWater" min="10" max="50" value="28">
+      </div>
+      <hr class="divider">
+      <div class="fraction-display" id="eqLine"></div>
+    </div>
+  </div>
+
+  <div class="compare-section">
+    <div class="compare-card m1">
+      <h4>小丽的方法</h4>
+      <div id="method1"></div>
+    </div>
+    <div class="compare-card m2">
+      <h4>小华的方法（方程）</h4>
+      <div id="method2"></div>
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="verify-card">
+    <h4>回顾与反思</h4>
+    <div id="verify"></div>
+  </div>
+
+  <div class="answer-card" id="answer"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, CX = W/2;
+
+const sDen = document.getElementById('sDen');
+const sWater = document.getElementById('sWater');
+const vDen = document.getElementById('vDen');
+const vWater = document.getElementById('vWater');
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function frac(n, d) {
+  var g = gcd(n, d);
+  return [n/g, d/g];
+}
+function fracStr(n, d) {
+  var f = frac(n, d);
+  return f[1] === 1 ? '' + f[0] : '\\frac{' + f[0] + '}{' + f[1] + '}';
+}
+function fracStrPlain(n, d) {
+  var f = frac(n, d);
+  return f[1] === 1 ? '' + f[0] : f[0] + '/' + f[1];
+}
+
+function renderKatex(el, tex) {
+  try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+  catch(e) { el.textContent = tex; }
+}
+
+function drawScene(den, water) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Title
+  ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.fillText('儿童体内水分约占体重的 4/' + den, CX, 22);
+
+  // Draw body outline
+  var bodyX = CX - 40, bodyY = 55, bodyW = 80, bodyH = 150;
+  
+  // Body shape (simplified)
+  ctx.fillStyle = '#f1f5f9';
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  
+  // Head
+  ctx.beginPath();
+  ctx.arc(CX, bodyY, 25, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Body
+  ctx.beginPath();
+  ctx.roundRect(bodyX, bodyY + 30, bodyW, bodyH - 60, 10);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Arms
+  ctx.beginPath();
+  ctx.roundRect(bodyX - 30, bodyY + 40, 30, 60, 5);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.roundRect(bodyX + bodyW, bodyY + 40, 30, 60, 5);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Legs
+  ctx.beginPath();
+  ctx.roundRect(bodyX + 5, bodyY + bodyH - 30, 30, 50, 5);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.roundRect(bodyX + bodyW - 35, bodyY + bodyH - 30, 30, 50, 5);
+  ctx.fill();
+  ctx.stroke();
+
+  // Water fill (blue) - 4/den of body
+  var waterH = bodyH * 4 / den;
+  ctx.fillStyle = '#3b82f6';
+  ctx.globalAlpha = 0.3;
+  
+  // Fill body with water level
+  ctx.beginPath();
+  ctx.roundRect(bodyX, bodyY + 30 + (bodyH - 60) - waterH, bodyW, waterH, 10);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Water level line
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(bodyX - 50, bodyY + 30 + (bodyH - 60) - waterH);
+  ctx.lineTo(bodyX + bodyW + 50, bodyY + 30 + (bodyH - 60) - waterH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'left';
+  
+  // Water label
+  ctx.fillStyle = '#2563eb';
+  ctx.fillText('水分 ' + water + ' kg', bodyX + bodyW + 55, bodyY + 30 + (bodyH - 60) - waterH + 5);
+  
+  // Weight label
+  ctx.fillStyle = '#1e293b';
+  ctx.fillText('体重 ? kg', bodyX + bodyW + 55, bodyY + bodyH / 2 + 30);
+
+  // Fraction bar on top
+  var barY = bodyY + bodyH + 30;
+  var barW = 200;
+  var barH = 20;
+  var barX = CX - barW / 2;
+  
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(barX, barY, barW, barH);
+  
+  // Water portion
+  var waterW = barW * 4 / den;
+  ctx.fillStyle = '#3b82f6';
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(barX, barY, waterW, barH);
+  ctx.globalAlpha = 1;
+  
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(barX, barY, barW, barH);
+  
+  // Divisions
+  for (var i = 0; i < den; i++) {
+    ctx.beginPath();
+    ctx.moveTo(barX + i * barW / den, barY);
+    ctx.lineTo(barX + i * barW / den, barY + barH);
+    ctx.stroke();
+  }
+  
+  ctx.font = 'bold 12px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#2563eb';
+  ctx.textAlign = 'center';
+  ctx.fillText('水分占 4/' + den, CX, barY + barH + 18);
+
+  // Result
+  var weight = water * den / 4;
+  ctx.font = 'bold 14px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#16a34a';
+  ctx.textAlign = 'center';
+  ctx.fillText('体重 = ' + weight + ' kg', CX, barY + barH + 42);
+}
+
+function update() {
+  const den = +sDen.value;
+  const water = +sWater.value;
+
+  vDen.textContent = den;
+  vWater.textContent = water;
+
+  drawScene(den, water);
+
+  // Calculations
+  var weight = water * den / 4;
+  var wf = frac(water * den, 4);
+  var weightStr = fracStr(water * den, 4);
+
+  // Equation line
+  var eq = document.getElementById('eqLine');
+  renderKatex(eq, '\\text{小明的体重} \\times \\frac{4}{' + den + '} = ' + water + '\\text{ kg}');
+
+  // Method 1: Xiao Li
+  var m1 = document.getElementById('method1');
+  m1.innerHTML = '';
+  var m1tex = document.createElement('div');
+  renderKatex(m1tex, water + ' \\div \\frac{4}{' + den + '} = ' + water + ' \\times \\frac{' + den + '}{4} = ' + weightStr + '\\text{（kg）}');
+  m1.appendChild(m1tex);
+
+  // Method 2: Xiao Hua (equation)
+  var m2 = document.getElementById('method2');
+  m2.innerHTML = '';
+  var m2tex = document.createElement('div');
+  renderKatex(m2tex, '\\text{解：设小明的体重是 } x \\text{ kg}\\\\[8px] \\frac{4}{' + den + '}x = ' + water + '\\\\[8px] x = ' + water + ' \\div \\frac{4}{' + den + '}\\\\[8px] x = ' + weightStr);
+  m2.appendChild(m2tex);
+
+  // Steps
+  var stepsEl = document.getElementById('steps');
+  var html = '';
+
+  html += '<div class="step"><span class="step-num">1</span><span>';
+  var s1 = document.createElement('span');
+  renderKatex(s1, '\\text{已知：水分 ' + water + ' kg，占体重的 } \\frac{4}{' + den + '}');
+  html += s1.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">2</span><span>';
+  var s2 = document.createElement('span');
+  renderKatex(s2, '\\text{关系式：体重} \\times \\frac{4}{' + den + '} = \\text{水分重量}');
+  html += s2.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">3</span><span>';
+  var s3 = document.createElement('span');
+  renderKatex(s3, '\\text{所以：体重} = ' + water + ' \\div \\frac{4}{' + den + '} = ' + weight + '\\text{ kg}');
+  html += s3.innerHTML + '</span></div>';
+
+  stepsEl.innerHTML = html;
+
+  // Verification
+  var verify = document.getElementById('verify');
+  verify.innerHTML = '';
+  var vtex = document.createElement('div');
+  renderKatex(vtex, weight + ' \\times \\frac{4}{' + den + '} = ' + water + '\\text{ kg} \\quad \\checkmark');
+  verify.appendChild(vtex);
+
+  // Answer
+  var ans = document.getElementById('answer');
+  var a = document.createElement('span');
+  renderKatex(a, '\\boxed{\\text{小明的体重是 } ' + weight + '\\text{ kg}}');
+  ans.innerHTML = a.innerHTML;
+}
+
+sDen.addEventListener('input', update);
+sWater.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
