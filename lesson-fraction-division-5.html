@@ -1,0 +1,497 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数除法应用4 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .main-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    max-width: 860px;
+    width: 100%;
+  }
+  .top-section {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    border-radius: 16px;
+    background: #f1f5f9;
+  }
+  .controls {
+    flex: 1;
+    min-width: 260px;
+  }
+  .control-group {
+    margin-bottom: 24px;
+  }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .control-group label span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  .fraction-display {
+    text-align: center;
+    padding: 16px 0 4px;
+  }
+  .fraction-display .katex { font-size: 1.5em; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 20px;
+  }
+  .steps-section {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .steps-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step .katex { font-size: 1.2em; }
+  .compare-section {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .compare-card {
+    flex: 1;
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .compare-card.m1 {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 2px solid #93c5fd;
+  }
+  .compare-card.m2 {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #fcd34d;
+  }
+  .compare-card h4 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .compare-card.m1 h4 { color: #1d4ed8; }
+  .compare-card.m2 h4 { color: #b45309; }
+  .compare-card .katex { font-size: 1.1em; }
+  .verify-card {
+    background: linear-gradient(135deg, #dcfce7, #d1fae5);
+    border: 2px solid #22c55e;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .verify-card h4 {
+    font-size: 14px;
+    color: #16a34a;
+    margin-bottom: 10px;
+  }
+  .verify-card .katex { font-size: 1.3em; }
+  .answer-card {
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    border: 2px solid #a78bfa;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .answer-card .katex { font-size: 1.5em; }
+  @media (max-width: 700px) {
+    .top-section { flex-direction: column; align-items: center; }
+    .controls { width: 100%; }
+    .main-card { padding: 24px 20px; }
+    .compare-section { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<h1>分数除法应用4 · 交互演示</h1>
+<p class="subtitle">已知小明体重和比爸爸轻的比例，求爸爸体重</p>
+
+<div class="main-card">
+  <div class="top-section">
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="340" height="340"></canvas>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>小明的体重（kg）<span id="vWeight">35</span></label>
+        <input type="range" id="sWeight" min="20" max="60" value="35">
+      </div>
+      <div class="control-group">
+        <label>比爸爸轻几分之几（分母）<span id="vDen">15</span></label>
+        <input type="range" id="sDen" min="3" max="20" value="15">
+      </div>
+      <hr class="divider">
+      <div class="fraction-display" id="eqLine"></div>
+    </div>
+  </div>
+
+  <div class="compare-section">
+    <div class="compare-card m1">
+      <h4>方法一：爸爸 × (1 - 轻的比例) = 小明</h4>
+      <div id="method1"></div>
+    </div>
+    <div class="compare-card m2">
+      <h4>方法二：爸爸 - 轻的部分 = 小明</h4>
+      <div id="method2"></div>
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="verify-card">
+    <h4>回顾与反思</h4>
+    <div id="verify"></div>
+  </div>
+
+  <div class="answer-card" id="answer"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, CX = W/2;
+
+const sWeight = document.getElementById('sWeight');
+const sDen = document.getElementById('sDen');
+const vWeight = document.getElementById('vWeight');
+const vDen = document.getElementById('vDen');
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function frac(n, d) {
+  var g = gcd(n, d);
+  return [n/g, d/g];
+}
+function fracStr(n, d) {
+  var f = frac(n, d);
+  return f[1] === 1 ? '' + f[0] : '\\frac{' + f[0] + '}{' + f[1] + '}';
+}
+function fracStrPlain(n, d) {
+  var f = frac(n, d);
+  return f[1] === 1 ? '' + f[0] : f[0] + '/' + f[1];
+}
+
+function renderKatex(el, tex) {
+  try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+  catch(e) { el.textContent = tex; }
+}
+
+function drawScene(weight, den) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Calculate father's weight
+  var fatherWeight = weight * den / (den - 8);
+  var lighterNum = 8;
+  var lighterDen = den;
+
+  // Title
+  ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.fillText('小明体重 ' + weight + ' kg，比爸爸轻 8/' + den, CX, 22);
+
+  // Draw father bar (full)
+  var barX = 50, barY = 60, barH = 40;
+  var fatherBarW = 240;
+  
+  ctx.fillStyle = '#3b82f6';
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(barX, barY, fatherBarW, barH);
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(barX, barY, fatherBarW, barH);
+  
+  // Divisions
+  for (var i = 0; i < den; i++) {
+    ctx.beginPath();
+    ctx.moveTo(barX + i * fatherBarW / den, barY);
+    ctx.lineTo(barX + i * fatherBarW / den, barY + barH);
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  
+  // Label
+  ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#2563eb';
+  ctx.textAlign = 'right';
+  ctx.fillText('爸爸', barX - 8, barY + barH / 2 + 5);
+  ctx.textAlign = 'left';
+  ctx.fillText('? kg', barX + fatherBarW + 8, barY + barH / 2 + 5);
+
+  // Draw Xiao Ming bar (shorter by 8/den)
+  var xmBarY = barY + barH + 30;
+  var xmBarW = fatherBarW * (den - 8) / den;
+  
+  ctx.fillStyle = '#f59e0b';
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(barX, xmBarY, xmBarW, barH);
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#d97706';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(barX, xmBarY, xmBarW, barH);
+  
+  // Divisions for Xiao Ming
+  for (var i = 0; i < den - 8; i++) {
+    ctx.beginPath();
+    ctx.moveTo(barX + i * fatherBarW / den, xmBarY);
+    ctx.lineTo(barX + i * fatherBarW / den, xmBarY + barH);
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  
+  // Label
+  ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#d97706';
+  ctx.textAlign = 'right';
+  ctx.fillText('小明', barX - 8, xmBarY + barH / 2 + 5);
+  ctx.textAlign = 'left';
+  ctx.fillText(weight + ' kg', barX + xmBarW + 8, xmBarY + barH / 2 + 5);
+
+  // Show lighter part (dashed)
+  ctx.strokeStyle = '#ef4444';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(barX + xmBarW, xmBarY);
+  ctx.lineTo(barX + fatherBarW, xmBarY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Arrow showing lighter
+  ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#ef4444';
+  ctx.textAlign = 'center';
+  ctx.fillText('轻 8/' + den, barX + (xmBarW + fatherBarW) / 2, xmBarY - 8);
+
+  // Fraction bar explanation
+  var fracBarY = xmBarY + barH + 40;
+  var fracBarW = 200;
+  var fracBarH = 24;
+  var fracBarX = CX - fracBarW / 2;
+  
+  // Full bar (1)
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(fracBarX, fracBarY, fracBarW, fracBarH);
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(fracBarX, fracBarY, fracBarW, fracBarH);
+  
+  // Xiao Ming's portion (1 - 8/den = (den-8)/den)
+  var xmFracW = fracBarW * (den - 8) / den;
+  ctx.fillStyle = '#f59e0b';
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(fracBarX, fracBarY, xmFracW, fracBarH);
+  ctx.globalAlpha = 1;
+  
+  ctx.font = 'bold 12px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.fillText('小明占爸爸的 ' + (den-8) + '/' + den, CX, fracBarY + fracBarH + 20);
+
+  // Result
+  ctx.font = 'bold 14px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#16a34a';
+  ctx.fillText('爸爸体重 = ' + Math.round(fatherWeight * 10) / 10 + ' kg', CX, fracBarY + fracBarH + 45);
+}
+
+function update() {
+  const weight = +sWeight.value;
+  const den = +sDen.value;
+
+  vWeight.textContent = weight;
+  vDen.textContent = den;
+
+  drawScene(weight, den);
+
+  // Calculations
+  var lighterNum = 8;
+  var lighterDen = den;
+  var remainNum = den - 8;
+  var remainDen = den;
+  var fatherWeight = weight * den / remainNum;
+  var ff = frac(weight * den, remainNum);
+  var fatherWeightStr = fracStr(weight * den, remainNum);
+
+  // Equation line
+  var eq = document.getElementById('eqLine');
+  renderKatex(eq, '\\text{爸爸的体重} \\times \\frac{' + remainNum + '}{' + remainDen + '} = ' + weight);
+
+  // Method 1
+  var m1 = document.getElementById('method1');
+  m1.innerHTML = '';
+  var m1tex = document.createElement('div');
+  renderKatex(m1tex, '(1 - \\frac{8}{' + den + '})x = ' + weight + '\\\\[8px] \\frac{' + remainNum + '}{' + remainDen + '}x = ' + weight + '\\\\[8px] x = ' + weight + ' \\times \\frac{' + remainDen + '}{' + remainNum + '} = ' + fatherWeightStr);
+  m1.appendChild(m1tex);
+
+  // Method 2
+  var m2 = document.getElementById('method2');
+  m2.innerHTML = '';
+  var m2tex = document.createElement('div');
+  renderKatex(m2tex, 'x - \\frac{8}{' + den + '}x = ' + weight + '\\\\[8px] \\frac{' + remainNum + '}{' + remainDen + '}x = ' + weight + '\\\\[8px] x = ' + fatherWeightStr);
+  m2.appendChild(m2tex);
+
+  // Steps
+  var stepsEl = document.getElementById('steps');
+  var html = '';
+
+  html += '<div class="step"><span class="step-num">1</span><span>';
+  var s1 = document.createElement('span');
+  renderKatex(s1, '\\text{小明比爸爸轻 } \\frac{8}{' + den + '}\\text{，即小明是爸爸的 } \\frac{' + remainNum + '}{' + remainDen + '}');
+  html += s1.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">2</span><span>';
+  var s2 = document.createElement('span');
+  renderKatex(s2, '\\text{爸爸的体重} \\times \\frac{' + remainNum + '}{' + remainDen + '} = ' + weight);
+  html += s2.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">3</span><span>';
+  var s3 = document.createElement('span');
+  renderKatex(s3, '\\text{爸爸的体重} = ' + weight + ' \\div \\frac{' + remainNum + '}{' + remainDen + '} = ' + weight + ' \\times \\frac{' + remainDen + '}{' + remainNum + '} = ' + fatherWeightStr);
+  html += s3.innerHTML + '</span></div>';
+
+  stepsEl.innerHTML = html;
+
+  // Verification
+  var verify = document.getElementById('verify');
+  verify.innerHTML = '';
+  var vtex = document.createElement('div');
+  var vResult = (fatherWeight - weight) / fatherWeight;
+  var vf = frac(fatherWeight - weight, fatherWeight);
+  renderKatex(vtex, '(' + fatherWeightStr + ' - ' + weight + ') \\div ' + fatherWeightStr + ' = \\frac{' + vf[0] + '}{' + vf[1] + '}');
+  verify.appendChild(vtex);
+
+  // Answer
+  var ans = document.getElementById('answer');
+  var a = document.createElement('span');
+  renderKatex(a, '\\boxed{\\text{小明爸爸的体重是 } ' + fatherWeightStr + '\\text{ kg}}');
+  ans.innerHTML = a.innerHTML;
+}
+
+sWeight.addEventListener('input', update);
+sDen.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
