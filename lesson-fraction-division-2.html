@@ -1,0 +1,570 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数除法应用 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .main-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    max-width: 860px;
+    width: 100%;
+  }
+  .top-section {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    border-radius: 16px;
+    background: #f1f5f9;
+  }
+  .controls {
+    flex: 1;
+    min-width: 260px;
+  }
+  .control-group {
+    margin-bottom: 24px;
+  }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .control-group label span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  .fraction-display {
+    text-align: center;
+    padding: 16px 0 4px;
+  }
+  .fraction-display .katex { font-size: 1.5em; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 20px;
+  }
+  .steps-section {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .steps-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step .katex { font-size: 1.2em; }
+  .compare-section {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .compare-card {
+    flex: 1;
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .compare-card.xm {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 2px solid #93c5fd;
+  }
+  .compare-card.xh {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #fcd34d;
+  }
+  .compare-card h4 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .compare-card.xm h4 { color: #1d4ed8; }
+  .compare-card.xh h4 { color: #b45309; }
+  .compare-card .katex { font-size: 1.3em; }
+  .answer-card {
+    background: linear-gradient(135deg, #dcfce7, #d1fae5);
+    border: 2px solid #22c55e;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .answer-card .katex { font-size: 1.5em; }
+  .conclusion-card {
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    border: 2px solid #a78bfa;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .conclusion-card h4 {
+    font-size: 15px;
+    color: #7c3aed;
+    margin-bottom: 8px;
+  }
+  .conclusion-card .katex { font-size: 1.4em; }
+  @media (max-width: 700px) {
+    .top-section { flex-direction: column; align-items: center; }
+    .controls { width: 100%; }
+    .main-card { padding: 24px 20px; }
+    .compare-section { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<h1>分数除法应用 · 交互演示</h1>
+<p class="subtitle">比较谁走得快：分数除法的实际应用</p>
+
+<div class="main-card">
+  <div class="top-section">
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="340" height="340"></canvas>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>小明走了几小时（分母）<span id="vT1">3</span></label>
+        <input type="range" id="sT1" min="2" max="12" value="3">
+      </div>
+      <div class="control-group">
+        <label>小明走了几km <span id="vD1">2</span></label>
+        <input type="range" id="sD1" min="1" max="10" value="2">
+      </div>
+      <div class="control-group">
+        <label>小红走了几小时（分母）<span id="vT2">12</span></label>
+        <input type="range" id="sT2" min="2" max="24" value="12">
+      </div>
+      <div class="control-group">
+        <label>小红走了几km（分子）<span id="vD2">5</span></label>
+        <input type="range" id="sD2" min="1" max="10" value="5">
+      </div>
+      <hr class="divider">
+      <div class="fraction-display" id="eqLine"></div>
+    </div>
+  </div>
+
+  <div class="compare-section">
+    <div class="compare-card xm">
+      <h4>小明的速度</h4>
+      <div id="speed1"></div>
+    </div>
+    <div class="compare-card xh">
+      <h4>小红的速度</h4>
+      <div id="speed2"></div>
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="answer-card" id="answer"></div>
+
+  <div class="conclusion-card">
+    <h4>发现规律</h4>
+    <div id="conclusion"></div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, CX = W/2;
+
+const sT1 = document.getElementById('sT1');
+const sD1 = document.getElementById('sD1');
+const sT2 = document.getElementById('sT2');
+const sD2 = document.getElementById('sD2');
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function frac(n, d) {
+  var g = gcd(n, d);
+  return [n/g, d/g];
+}
+function fracStr(n, d) {
+  var f = frac(n, d);
+  return f[1] === 1 ? '' + f[0] : '\\frac{' + f[0] + '}{' + f[1] + '}';
+}
+
+function renderKatex(el, tex) {
+  try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+  catch(e) { el.textContent = tex; }
+}
+
+function drawScene(t1Num, t1Den, d1, t2Num, t2Den, d2) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Title
+  ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.fillText('谁走得快？', CX, 20);
+
+  // Xiao Ming - blue
+  var y1 = 55;
+  var barW = 260;
+  var x0 = (W - barW) / 2;
+
+  // Draw person icon (simple stick figure)
+  ctx.fillStyle = '#3b82f6';
+  ctx.beginPath();
+  ctx.arc(x0 - 30, y1 + 20, 12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x0 - 30, y1 + 32);
+  ctx.lineTo(x0 - 30, y1 + 55);
+  ctx.moveTo(x0 - 30, y1 + 40);
+  ctx.lineTo(x0 - 42, y1 + 50);
+  ctx.moveTo(x0 - 30, y1 + 40);
+  ctx.lineTo(x0 - 18, y1 + 50);
+  ctx.moveTo(x0 - 30, y1 + 55);
+  ctx.lineTo(x0 - 40, y1 + 70);
+  ctx.moveTo(x0 - 30, y1 + 55);
+  ctx.lineTo(x0 - 20, y1 + 70);
+  ctx.stroke();
+
+  // Time bar for Xiao Ming
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, y1, barW, 30);
+  var timeSliceW = barW / t1Den;
+  ctx.fillStyle = '#3b82f6';
+  ctx.globalAlpha = 0.35;
+  for (var i = 0; i < t1Num; i++) {
+    ctx.fillRect(x0 + i * timeSliceW + 1, y1 + 1, timeSliceW - 2, 28);
+  }
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  for (var i = 0; i <= t1Den; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x0 + i * timeSliceW, y1);
+    ctx.lineTo(x0 + i * timeSliceW, y1 + 30);
+    ctx.stroke();
+  }
+  ctx.strokeRect(x0, y1, barW, 30);
+
+  ctx.font = 'bold 12px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#2563eb';
+  ctx.textAlign = 'left';
+  ctx.fillText(t1Num + '/' + t1Den + '小时走了' + d1 + 'km', x0 + barW + 5, y1 + 18);
+
+  // Xiao Hong - orange
+  var y2 = y1 + 95;
+
+  // Draw person icon
+  ctx.fillStyle = '#f59e0b';
+  ctx.beginPath();
+  ctx.arc(x0 - 30, y2 + 20, 12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x0 - 30, y2 + 32);
+  ctx.lineTo(x0 - 30, y2 + 55);
+  ctx.moveTo(x0 - 30, y2 + 40);
+  ctx.lineTo(x0 - 42, y2 + 50);
+  ctx.moveTo(x0 - 30, y2 + 40);
+  ctx.lineTo(x0 - 18, y2 + 50);
+  ctx.moveTo(x0 - 30, y2 + 55);
+  ctx.lineTo(x0 - 40, y2 + 70);
+  ctx.moveTo(x0 - 30, y2 + 55);
+  ctx.lineTo(x0 - 20, y2 + 70);
+  ctx.stroke();
+
+  // Time bar for Xiao Hong
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, y2, barW, 30);
+  var timeSliceW2 = barW / t2Den;
+  ctx.fillStyle = '#f59e0b';
+  ctx.globalAlpha = 0.35;
+  for (var i = 0; i < t2Num; i++) {
+    ctx.fillRect(x0 + i * timeSliceW2 + 1, y2 + 1, timeSliceW2 - 2, 28);
+  }
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#cbd5e1';
+  for (var i = 0; i <= t2Den; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x0 + i * timeSliceW2, y2);
+    ctx.lineTo(x0 + i * timeSliceW2, y2 + 30);
+    ctx.stroke();
+  }
+  ctx.strokeRect(x0, y2, barW, 30);
+
+  ctx.font = 'bold 12px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#d97706';
+  ctx.fillText(t2Num + '/' + t2Den + '小时走了' + d2 + 'km', x0 + barW + 5, y2 + 18);
+
+  // Speed comparison - arrow
+  var y3 = y2 + 70;
+  ctx.font = '600 14px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.fillText('速度 = 路程 ÷ 时间', CX, y3);
+
+  // Speed bars
+  var speed1 = d1 * t1Den / t1Num; // km per hour
+  var speed2 = d2 * t2Den / t2Num;
+  var maxSpeed = Math.max(speed1, speed2);
+  var barMaxW = 200;
+  var barH = 24;
+
+  var y4 = y3 + 20;
+  ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#3b82f6';
+  ctx.fillText('小明', x0 - 5, y4 + barH/2 + 4);
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, y4, barMaxW, barH);
+  ctx.fillStyle = '#3b82f6';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(x0, y4, barMaxW * speed1 / maxSpeed, barH);
+  ctx.globalAlpha = 1;
+  ctx.font = 'bold 12px -apple-system, sans-serif';
+  ctx.fillStyle = '#1d4ed8';
+  ctx.textAlign = 'left';
+  var f1 = frac(d1 * t1Den, t1Num);
+  ctx.fillText((f1[1]===1?f1[0]:f1[0]+'/'+f1[1]) + ' km/h', x0 + barMaxW * speed1 / maxSpeed + 8, y4 + barH/2 + 4);
+
+  var y5 = y4 + 36;
+  ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillText('小红', x0 - 5, y5 + barH/2 + 4);
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, y5, barMaxW, barH);
+  ctx.fillStyle = '#f59e0b';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(x0, y5, barMaxW * speed2 / maxSpeed, barH);
+  ctx.globalAlpha = 1;
+  ctx.font = 'bold 12px -apple-system, sans-serif';
+  ctx.fillStyle = '#b45309';
+  var f2 = frac(d2 * t2Den, t2Num);
+  ctx.fillText((f2[1]===1?f2[0]:f2[0]+'/'+f2[1]) + ' km/h', x0 + barMaxW * speed2 / maxSpeed + 8, y5 + barH/2 + 4);
+
+  // Winner
+  var y6 = y5 + 45;
+  ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'center';
+  if (speed1 > speed2) {
+    ctx.fillStyle = '#3b82f6';
+    ctx.fillText('小明走得快！', CX, y6);
+  } else if (speed2 > speed1) {
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillText('小红走得快！', CX, y6);
+  } else {
+    ctx.fillStyle = '#10b981';
+    ctx.fillText('一样快！', CX, y6);
+  }
+}
+
+function update() {
+  const t1Den = +sT1.value;
+  const d1 = +sD1.value;
+  const t2Den = +sT2.value;
+  const d2 = +sD2.value;
+
+  // Xiao Ming: walked t1Num/t1Den hours = d1 km, speed = d1 / (t1Num/t1Den)
+  // We fix t1Num = 1 for simplicity (walked 1/t1Den hours)
+  const t1Num = 1;
+  const t2Num = 1;
+
+  vT1.textContent = t1Den;
+  vD1.textContent = d1;
+  vT2.textContent = t2Den;
+  vD2.textContent = d2;
+
+  drawScene(t1Num, t1Den, d1, t2Num, t2Den, d2);
+
+  // Speeds
+  var speed1Num = d1 * t1Den;
+  var speed1Den = t1Num;
+  var speed2Num = d2 * t2Den;
+  var speed2Den = t2Num;
+
+  var f1 = frac(speed1Num, speed1Den);
+  var f2 = frac(speed2Num, speed2Den);
+
+  // Equation line
+  var eq = document.getElementById('eqLine');
+  renderKatex(eq, '\\text{速度} = \\text{路程} \\div \\text{时间}');
+
+  // Speed cards
+  var sp1 = document.getElementById('speed1');
+  sp1.innerHTML = '';
+  var sp1tex = document.createElement('div');
+  renderKatex(sp1tex, d1 + ' \\div \\frac{1}{' + t1Den + '} = ' + d1 + ' \\times ' + t1Den + ' = ' + fracStr(speed1Num, speed1Den) + '\\text{ km/h}');
+  sp1.appendChild(sp1tex);
+
+  var sp2 = document.getElementById('speed2');
+  sp2.innerHTML = '';
+  var sp2tex = document.createElement('div');
+  renderKatex(sp2tex, '\\frac{' + d2 + '}{' + t2Den + '} \\div \\frac{1}{' + t2Den + '} = \\frac{' + d2 + '}{' + t2Den + '} \\times ' + t2Den + ' = ' + fracStr(speed2Num, speed2Den) + '\\text{ km/h}');
+  sp2.appendChild(sp2tex);
+
+  // Steps
+  var stepsEl = document.getElementById('steps');
+  var html = '';
+
+  html += '<div class="step"><span class="step-num">1</span><span>';
+  var s1 = document.createElement('span');
+  renderKatex(s1, '\\text{小明：} \\frac{1}{' + t1Den + '} \\text{ 小时走了 ' + d1 + ' km}');
+  html += s1.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">2</span><span>';
+  var s2 = document.createElement('span');
+  renderKatex(s2, '\\text{1 小时是 } ' + t1Den + '\\text{ 个 } \\frac{1}{' + t1Den + '}\\text{，所以速度 }= ' + d1 + ' \\times ' + t1Den + ' = ' + fracStr(speed1Num, speed1Den));
+  html += s2.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">3</span><span>';
+  var s3 = document.createElement('span');
+  renderKatex(s3, '\\text{小红：} \\frac{' + d2 + '}{' + t2Den + '} \\div \\frac{1}{' + t2Den + '} = \\frac{' + d2 + '}{' + t2Den + '} \\times ' + t2Den + ' = ' + fracStr(speed2Num, speed2Den));
+  html += s3.innerHTML + '</span></div>';
+
+  stepsEl.innerHTML = html;
+
+  // Answer
+  var ans = document.getElementById('answer');
+  var winner, winSpeed, loseSpeed;
+  if (f1[0]*f2[1] > f2[0]*f1[1]) {
+    winner = '小明';
+    winSpeed = fracStr(speed1Num, speed1Den);
+    loseSpeed = fracStr(speed2Num, speed2Den);
+  } else if (f2[0]*f1[1] > f1[0]*f2[1]) {
+    winner = '小红';
+    winSpeed = fracStr(speed2Num, speed2Den);
+    loseSpeed = fracStr(speed1Num, speed1Den);
+  } else {
+    winner = '两人一样快';
+    winSpeed = fracStr(speed1Num, speed1Den);
+    loseSpeed = winSpeed;
+  }
+  var a = document.createElement('span');
+  renderKatex(a, '\\text{小明走得快}');
+  ans.innerHTML = a.innerHTML;
+
+  // Conclusion
+  var conc = document.getElementById('conclusion');
+  conc.innerHTML = '';
+  var ctex = document.createElement('div');
+  renderKatex(ctex, '\\text{一个数除以一个分数，等于乘上这个分数的倒数。}');
+  conc.appendChild(ctex);
+}
+
+sT1.addEventListener('input', update);
+sD1.addEventListener('input', update);
+sT2.addEventListener('input', update);
+sD2.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
