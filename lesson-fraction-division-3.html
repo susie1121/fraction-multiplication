@@ -1,0 +1,545 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数除法应用2 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .main-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    max-width: 860px;
+    width: 100%;
+  }
+  .top-section {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    border-radius: 16px;
+    background: #f1f5f9;
+  }
+  .controls {
+    flex: 1;
+    min-width: 260px;
+  }
+  .control-group {
+    margin-bottom: 24px;
+  }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .control-group label span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  .fraction-display {
+    text-align: center;
+    padding: 16px 0 4px;
+  }
+  .fraction-display .katex { font-size: 1.5em; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 20px;
+  }
+  .steps-section {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .steps-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step .katex { font-size: 1.2em; }
+  .method-box {
+    background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+    border: 2px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 20px 28px;
+    margin-bottom: 16px;
+  }
+  .method-box h4 {
+    font-size: 14px;
+    color: #1d4ed8;
+    margin-bottom: 10px;
+  }
+  .method-box .katex { font-size: 1.3em; }
+  .compare-section {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .compare-card {
+    flex: 1;
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .compare-card.m1 {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 2px solid #93c5fd;
+  }
+  .compare-card.m2 {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #fcd34d;
+  }
+  .compare-card h4 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .compare-card.m1 h4 { color: #1d4ed8; }
+  .compare-card.m2 h4 { color: #b45309; }
+  .compare-card .katex { font-size: 1.2em; }
+  .answer-card {
+    background: linear-gradient(135deg, #dcfce7, #d1fae5);
+    border: 2px solid #22c55e;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .answer-card .katex { font-size: 1.5em; }
+  .combined-section {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .combined-card {
+    flex: 1;
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    border: 2px solid #a78bfa;
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .combined-card h4 {
+    font-size: 14px;
+    color: #7c3aed;
+    margin-bottom: 10px;
+  }
+  .combined-card .katex { font-size: 1.3em; }
+  @media (max-width: 700px) {
+    .top-section { flex-direction: column; align-items: center; }
+    .controls { width: 100%; }
+    .main-card { padding: 24px 20px; }
+    .compare-section, .combined-section { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<h1>分数除法应用2 · 交互演示</h1>
+<p class="subtitle">一盒药可以吃几天？两种方法解决问题</p>
+
+<div class="main-card">
+  <div class="top-section">
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="340" height="340"></canvas>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>一共有几片药 <span id="vTotal">12</span></label>
+        <input type="range" id="sTotal" min="4" max="24" value="12">
+      </div>
+      <div class="control-group">
+        <label>每次吃几片（分母）<span id="vPerTime">2</span></label>
+        <input type="range" id="sPerTime" min="2" max="8" value="2">
+      </div>
+      <div class="control-group">
+        <label>每天吃几次 <span id="vTimes">3</span></label>
+        <input type="range" id="sTimes" min="1" max="6" value="3">
+      </div>
+      <hr class="divider">
+      <div class="fraction-display" id="eqLine"></div>
+    </div>
+  </div>
+
+  <div class="compare-section">
+    <div class="compare-card m1">
+      <h4>方法一：先算每天吃多少片</h4>
+      <div id="method1"></div>
+    </div>
+    <div class="compare-card m2">
+      <h4>方法二：先算可以吃几次</h4>
+      <div id="method2"></div>
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="answer-card" id="answer"></div>
+
+  <div class="combined-section">
+    <div class="combined-card">
+      <h4>综合算式一</h4>
+      <div id="combined1"></div>
+    </div>
+    <div class="combined-card">
+      <h4>综合算式二</h4>
+      <div id="combined2"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, CX = W/2;
+
+const sTotal = document.getElementById('sTotal');
+const sPerTime = document.getElementById('sPerTime');
+const sTimes = document.getElementById('sTimes');
+const vTotal = document.getElementById('vTotal');
+const vPerTime = document.getElementById('vPerTime');
+const vTimes = document.getElementById('vTimes');
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function frac(n, d) {
+  var g = gcd(n, d);
+  return [n/g, d/g];
+}
+function fracStr(n, d) {
+  var f = frac(n, d);
+  return f[1] === 1 ? '' + f[0] : '\\frac{' + f[0] + '}{' + f[1] + '}';
+}
+function fracStrPlain(n, d) {
+  var f = frac(n, d);
+  return f[1] === 1 ? '' + f[0] : f[0] + '/' + f[1];
+}
+
+function renderKatex(el, tex) {
+  try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+  catch(e) { el.textContent = tex; }
+}
+
+function drawScene(total, perTimeDen, times) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Title
+  ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.fillText('一盒药共 ' + total + ' 片，每次吃 1/' + perTimeDen + ' 片', CX, 22);
+
+  // Draw pills in a box
+  var boxX = 30, boxY = 50, boxW = 280, boxH = 100;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(boxX, boxY, boxW, boxH, 10);
+  ctx.fill();
+  ctx.stroke();
+
+  // Draw pills
+  var pillR = 10;
+  var cols = Math.ceil(Math.sqrt(total * 2));
+  var rows = Math.ceil(total / cols);
+  var pillW = Math.min(30, (boxW - 20) / cols);
+  var pillH = Math.min(25, (boxH - 20) / rows);
+  var startX = boxX + (boxW - cols * pillW) / 2;
+  var startY = boxY + (boxH - rows * pillH) / 2;
+
+  for (var i = 0; i < total; i++) {
+    var col = i % cols;
+    var row = Math.floor(i / cols);
+    var px = startX + col * pillW + pillW/2;
+    var py = startY + row * pillH + pillH/2;
+    
+    // Draw pill capsule
+    ctx.fillStyle = '#3b82f6';
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.ellipse(px, py, pillW/2 - 2, pillH/2 - 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Half line
+    ctx.beginPath();
+    ctx.moveTo(px, py - pillH/2 + 2);
+    ctx.lineTo(px, py + pillH/2 - 2);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // Label
+  ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.fillText('共 ' + total + ' 片', CX, boxY + boxH + 20);
+
+  // Arrow down
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.fillText('↓', CX, boxY + boxH + 40);
+
+  // Daily consumption
+  var dailyNum = times;
+  var dailyDen = perTimeDen;
+  var df = frac(dailyNum, dailyDen);
+  
+  ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#2563eb';
+  ctx.fillText('每天吃 ' + fracStrPlain(dailyNum, dailyDen) + ' 片（' + times + ' × 1/' + perTimeDen + '）', CX, boxY + boxH + 60);
+
+  // Draw daily pills
+  var dailyY = boxY + boxH + 75;
+  var dailyPillW = 40;
+  var dailyStartX = CX - (times * dailyPillW) / 2;
+  
+  for (var i = 0; i < times; i++) {
+    var px = dailyStartX + i * dailyPillW + dailyPillW/2;
+    
+    // Half pill
+    ctx.fillStyle = '#f59e0b';
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.arc(px, dailyY, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    
+    // Half fill
+    ctx.beginPath();
+    ctx.arc(px, dailyY, 12, -Math.PI/2, Math.PI/2);
+    ctx.fillStyle = '#fbbf24';
+    ctx.globalAlpha = 0.5;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Result
+  var resultNum = total * perTimeDen;
+  var resultDen = times * perTimeDen;
+  var days = resultNum / resultDen;
+  
+  ctx.font = 'bold 14px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#16a34a';
+  ctx.textAlign = 'center';
+  ctx.fillText('可以吃 ' + days + ' 天', CX, dailyY + 40);
+}
+
+function update() {
+  const total = +sTotal.value;
+  const perTimeDen = +sPerTime.value;
+  const times = +sTimes.value;
+
+  vTotal.textContent = total;
+  vPerTime.textContent = perTimeDen;
+  vTimes.textContent = times;
+
+  drawScene(total, perTimeDen, times);
+
+  // Method 1: daily consumption first
+  var dailyNum = times;
+  var dailyDen = perTimeDen;
+  var df = frac(dailyNum, dailyDen);
+  
+  // Method 2: total times first
+  var totalTimes = total * perTimeDen;
+  var days2 = totalTimes / times;
+
+  // Equation line
+  var eq = document.getElementById('eqLine');
+  renderKatex(eq, '\\text{这盒药可以吃几天？}');
+
+  // Method 1
+  var m1 = document.getElementById('method1');
+  m1.innerHTML = '';
+  var m1tex = document.createElement('div');
+  var dailyStr = fracStr(dailyNum, dailyDen);
+  var result1Num = total * dailyDen;
+  var result1Den = dailyNum;
+  var days1 = result1Num / result1Den;
+  renderKatex(m1tex, '\\frac{1}{' + perTimeDen + '} \\times ' + times + ' = ' + dailyStr + '\\text{（片）}\\\\[8px] ' + total + ' \\div ' + dailyStr + ' = ' + days1 + '\\text{（天）}');
+  m1.appendChild(m1tex);
+
+  // Method 2
+  var m2 = document.getElementById('method2');
+  m2.innerHTML = '';
+  var m2tex = document.createElement('div');
+  renderKatex(m2tex, total + ' \\div \\frac{1}{' + perTimeDen + '} = ' + total + ' \\times ' + perTimeDen + ' = ' + totalTimes + '\\text{（次）}\\\\[8px] ' + totalTimes + ' \\div ' + times + ' = ' + days2 + '\\text{（天）}');
+  m2.appendChild(m2tex);
+
+  // Steps
+  var stepsEl = document.getElementById('steps');
+  var html = '';
+
+  html += '<div class="step"><span class="step-num">1</span><span>';
+  var s1 = document.createElement('span');
+  renderKatex(s1, '\\text{方法一：先算每天吃多少片}');
+  html += s1.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">2</span><span>';
+  var s2 = document.createElement('span');
+  renderKatex(s2, '\\text{每天吃 } \\frac{1}{' + perTimeDen + '} \\times ' + times + ' = ' + dailyStr + '\\text{ 片}');
+  html += s2.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">3</span><span>';
+  var s3 = document.createElement('span');
+  renderKatex(s3, '\\text{这盒药可以吃 } ' + total + ' \\div ' + dailyStr + ' = ' + days1 + '\\text{ 天}');
+  html += s3.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">4</span><span>';
+  var s4 = document.createElement('span');
+  renderKatex(s4, '\\text{方法二：先算可以吃几次}');
+  html += s4.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">5</span><span>';
+  var s5 = document.createElement('span');
+  renderKatex(s5, '\\text{可以吃 } ' + total + ' \\div \\frac{1}{' + perTimeDen + '} = ' + totalTimes + '\\text{ 次}');
+  html += s5.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">6</span><span>';
+  var s6 = document.createElement('span');
+  renderKatex(s6, '\\text{每天吃 ' + times + ' 次，可以吃 } ' + totalTimes + ' \\div ' + times + ' = ' + days2 + '\\text{ 天}');
+  html += s6.innerHTML + '</span></div>';
+
+  stepsEl.innerHTML = html;
+
+  // Answer
+  var ans = document.getElementById('answer');
+  var a = document.createElement('span');
+  renderKatex(a, '\\boxed{\\text{这盒药可以吃 } ' + days1 + ' \\text{ 天}}');
+  ans.innerHTML = a.innerHTML;
+
+  // Combined expressions
+  var c1 = document.getElementById('combined1');
+  c1.innerHTML = '';
+  var c1tex = document.createElement('div');
+  renderKatex(c1tex, '12 \\div (\\frac{1}{' + perTimeDen + '} \\times ' + times + ') = 12 \\div ' + dailyStr + ' = ' + days1);
+  c1.appendChild(c1tex);
+
+  var c2 = document.getElementById('combined2');
+  c2.innerHTML = '';
+  var c2tex = document.createElement('div');
+  renderKatex(c2tex, '12 \\div \\frac{1}{' + perTimeDen + '} \\div ' + times + ' = ' + totalTimes + ' \\div ' + times + ' = ' + days2);
+  c2.appendChild(c2tex);
+}
+
+sTotal.addEventListener('input', update);
+sPerTime.addEventListener('input', update);
+sTimes.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
