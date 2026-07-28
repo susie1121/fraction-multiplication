@@ -1,0 +1,456 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数除法 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .main-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    max-width: 860px;
+    width: 100%;
+  }
+  .top-section {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    border-radius: 16px;
+    background: #f1f5f9;
+  }
+  .controls {
+    flex: 1;
+    min-width: 260px;
+  }
+  .control-group {
+    margin-bottom: 24px;
+  }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .control-group label span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  .fraction-display {
+    text-align: center;
+    padding: 16px 0 4px;
+  }
+  .fraction-display .katex { font-size: 1.5em; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 20px;
+  }
+  .steps-section {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .steps-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step .katex { font-size: 1.2em; }
+  .method-box {
+    background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+    border: 2px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 20px 28px;
+    margin-bottom: 16px;
+  }
+  .method-box h4 {
+    font-size: 14px;
+    color: #1d4ed8;
+    margin-bottom: 10px;
+  }
+  .method-box .katex { font-size: 1.4em; }
+  .answer-card {
+    background: linear-gradient(135deg, #dcfce7, #d1fae5);
+    border: 2px solid #22c55e;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .answer-card .katex { font-size: 1.6em; }
+  .question-card {
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    border: 2px solid #a78bfa;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .question-card h4 {
+    font-size: 15px;
+    color: #7c3aed;
+    margin-bottom: 8px;
+  }
+  .question-card .katex { font-size: 1.3em; }
+  @media (max-width: 700px) {
+    .top-section { flex-direction: column; align-items: center; }
+    .controls { width: 100%; }
+    .main-card { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>分数除法 · 交互演示</h1>
+<p class="subtitle">拖动滑块，观察分数除法的两种计算方法</p>
+
+<div class="main-card">
+  <div class="top-section">
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="340" height="340"></canvas>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>分子（取了几份）<span id="vNum">4</span></label>
+        <input type="range" id="sNum" min="1" max="12" value="4">
+      </div>
+      <div class="control-group">
+        <label>分母（总共几份）<span id="vDen">5</span></label>
+        <input type="range" id="sDen" min="2" max="16" value="5">
+      </div>
+      <div class="control-group">
+        <label>除以几 <span id="vDiv">2</span></label>
+        <input type="range" id="sDiv" min="2" max="8" value="2">
+      </div>
+      <hr class="divider">
+      <div class="fraction-display" id="eqLine"></div>
+    </div>
+  </div>
+
+  <div class="method-box" id="method1"></div>
+  <div class="method-box" id="method2"></div>
+
+  <div class="steps-section">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="answer-card" id="answer"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, CX = W/2, CY = H/2;
+
+const sNum = document.getElementById('sNum');
+const sDen = document.getElementById('sDen');
+const sDiv = document.getElementById('sDiv');
+const vNum = document.getElementById('vNum');
+const vDen = document.getElementById('vDen');
+const vDiv = document.getElementById('vDiv');
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+function renderKatex(el, tex) {
+  try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+  catch(e) { el.textContent = tex; }
+}
+
+function drawDivision(num, den, div) {
+  ctx.clearRect(0, 0, W, H);
+
+  const rectW = 280;
+  const rectH = 80;
+  const x0 = (W - rectW) / 2;
+
+  // Title
+  ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.fillText('把一张纸的 ' + num + '/' + den + ' 平均分成 ' + div + ' 份', CX, 22);
+
+  // Top bar: original fraction num/den (blue)
+  const yTop = 50;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, yTop, rectW, rectH);
+  const sliceW = rectW / den;
+  ctx.fillStyle = '#3b82f6';
+  ctx.globalAlpha = 0.35;
+  for (let i = 0; i < num; i++) {
+    ctx.fillRect(x0 + i * sliceW + 1, yTop + 1, sliceW - 2, rectH - 2);
+  }
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= den; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x0 + i * sliceW, yTop);
+    ctx.lineTo(x0 + i * sliceW, yTop + rectH);
+    ctx.stroke();
+  }
+  ctx.strokeRect(x0, yTop, rectW, rectH);
+
+  // Label
+  ctx.font = 'bold 14px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#2563eb';
+  ctx.textAlign = 'left';
+  ctx.fillText(num + '/' + den, x0 + rectW + 10, yTop + rectH / 2 + 5);
+
+  // Arrow
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.fillText('÷ ' + div, CX, yTop + rectH + 22);
+
+  // Bottom bar: result (orange) - show divided into groups
+  const yBot = yTop + rectH + 36;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, yBot, rectW, rectH);
+
+  // Each of the num parts is divided into div sub-parts
+  const subW = sliceW / div;
+  const g = gcd(num * div, den * div);
+  const resNum = num / g;
+  const resDen = (den * div) / g;
+  const canSimplify = g > 1;
+
+  // Color each group differently
+  const colors = ['#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316'];
+  for (let i = 0; i < num; i++) {
+    for (let j = 0; j < div; j++) {
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.globalAlpha = 0.35;
+      ctx.fillRect(x0 + i * sliceW + j * subW + 1, yBot + 1, subW - 2, rectH - 2);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Draw vertical lines for each original part
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= den; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x0 + i * sliceW, yBot);
+    ctx.lineTo(x0 + i * sliceW, yBot + rectH);
+    ctx.stroke();
+  }
+  // Draw dashed lines for sub-divisions within the shaded part
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.setLineDash([3, 3]);
+  for (let i = 0; i < num; i++) {
+    for (let j = 1; j < div; j++) {
+      ctx.beginPath();
+      ctx.moveTo(x0 + i * sliceW + j * subW, yBot);
+      ctx.lineTo(x0 + i * sliceW + j * subW, yBot + rectH);
+      ctx.stroke();
+    }
+  }
+  ctx.setLineDash([]);
+  ctx.strokeRect(x0, yBot, rectW, rectH);
+
+  // Result label
+  ctx.font = 'bold 14px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#d97706';
+  ctx.textAlign = 'left';
+  ctx.fillText(num * div + '/' + (den * div) + (canSimplify ? '  =  ' + resNum + '/' + resDen : ''), x0 + rectW + 10, yBot + rectH / 2 + 5);
+
+  // Bottom label
+  ctx.font = '600 12px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.fillText('每份是 ' + num + '/' + den + ' 的 1/' + div + '，即 ' + (num * div) + '/' + (den * div) + (canSimplify ? ' = ' + resNum + '/' + resDen : ''), CX, yBot + rectH + 22);
+
+  // Brace connecting top to bottom
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(x0 + rectW + 40, yTop + rectH / 2);
+  ctx.lineTo(x0 + rectW + 50, CY);
+  ctx.lineTo(x0 + rectW + 40, yBot + rectH / 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function update() {
+  let num = +sNum.value;
+  let den = +sDen.value;
+  const div = +sDiv.value;
+  if (num >= den) { num = den - 1; sNum.value = num; }
+  sNum.max = den - 1;
+
+  vNum.textContent = num;
+  vDen.textContent = den;
+  vDiv.textContent = div;
+
+  drawDivision(num, den, div);
+
+  const g = gcd(num * div, den * div);
+  const resNum = num / g;
+  const resDen = (den * div) / g;
+  const canSimplify = g > 1;
+  const resStr = canSimplify ? resNum + '/' + resDen : (num * div) + '/' + (den * div);
+
+  // Equation line
+  const eq = document.getElementById('eqLine');
+  renderKatex(eq, '\\frac{' + num + '}{' + den + '} \\div ' + div + ' = \\frac{' + resStr + '}');
+
+  // Method 1: direct division
+  const m1 = document.getElementById('method1');
+  m1.innerHTML = '<h4>方法一：直接分</h4>';
+  const m1tex = document.createElement('div');
+  renderKatex(m1tex, '\\frac{' + num + '}{' + den + '} \\div ' + div + ' = \\frac{' + num + '\\div' + div + '}{' + den + '} = \\frac{' + (num / div) + '}{' + den + '}');
+  if (num % div !== 0) {
+    // If not evenly divisible, show the raw form
+    m1tex.innerHTML = '';
+    renderKatex(m1tex, '\\frac{' + num + '}{' + den + '} \\div ' + div + ' = \\frac{' + num + ' \\times 1}{' + den + ' \\times ' + div + '} = \\frac{' + num + '}{' + (den * div) + '}' + (canSimplify ? ' = \\frac{' + resNum + '}{' + resDen + '}' : ''));
+  }
+  m1.appendChild(m1tex);
+
+  // Method 2: multiply by reciprocal
+  const m2 = document.getElementById('method2');
+  m2.innerHTML = '<h4>方法二：乘倒数</h4>';
+  const m2tex = document.createElement('div');
+  renderKatex(m2tex, '\\frac{' + num + '}{' + den + '} \\div ' + div + ' = \\frac{' + num + '}{' + den + '} \\times \\frac{1}{' + div + '} = \\frac{' + num + ' \\times 1}{' + den + ' \\times ' + div + '} = \\frac{' + num + '}{' + (den * div) + '}' + (canSimplify ? ' = \\frac{' + resNum + '}{' + resDen + '}' : ''));
+  m2.appendChild(m2tex);
+
+  // Steps
+  const stepsEl = document.getElementById('steps');
+  let html = '';
+
+  html += '<div class="step"><span class="step-num">1</span><span>';
+  const s1 = document.createElement('span');
+  renderKatex(s1, '\\text{把 } \\frac{' + num + '}{' + den + '} \\text{ 看作 ' + num + ' 个 } \\frac{1}{' + den + '}');
+  html += s1.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">2</span><span>';
+  const s2 = document.createElement('span');
+  renderKatex(s2, '\\text{平均分成 ' + div + ' 份，每份有 } \\frac{' + num + '}{' + div + '} \\text{ 个 } \\frac{1}{' + den + '}');
+  html += s2.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">3</span><span>';
+  const s3 = document.createElement('span');
+  renderKatex(s3, '\\text{即 } \\frac{' + num + '}{' + den + '} \\div ' + div + ' = \\frac{' + num + '}{' + den + '} \\times \\frac{1}{' + div + '} = \\frac{' + num + '}{' + (den * div) + '}' + (canSimplify ? ' = \\frac{' + resNum + '}{' + resDen + '}' : ''));
+  html += s3.innerHTML + '</span></div>';
+
+  stepsEl.innerHTML = html;
+
+  // Answer
+  const ans = document.getElementById('answer');
+  const a = document.createElement('span');
+  renderKatex(a, '\\boxed{\\frac{' + num + '}{' + den + '} \\div ' + div + ' = \\frac{' + resNum + '}{' + resDen + '}}');
+  ans.innerHTML = a.innerHTML;
+}
+
+sNum.addEventListener('input', update);
+sDen.addEventListener('input', update);
+sDiv.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
