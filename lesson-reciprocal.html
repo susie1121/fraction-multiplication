@@ -1,0 +1,482 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>倒数的认识 · 交互演示</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .main-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    max-width: 860px;
+    width: 100%;
+  }
+  .top-section {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    border-radius: 16px;
+    background: #f1f5f9;
+  }
+  .controls {
+    flex: 1;
+    min-width: 260px;
+  }
+  .control-group {
+    margin-bottom: 24px;
+  }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .control-group label span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    cursor: grab;
+  }
+  .fraction-display {
+    text-align: center;
+    padding: 16px 0 4px;
+  }
+  .fraction-display .katex { font-size: 1.5em; }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 20px;
+  }
+  .steps-section {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .steps-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step .katex { font-size: 1.2em; }
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .example-card {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .example-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 2px 12px rgba(37,99,235,0.15);
+  }
+  .example-card .katex { font-size: 1.3em; }
+  .example-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .reciprocal-highlight {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #f59e0b;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .reciprocal-highlight h4 {
+    font-size: 15px;
+    color: #b45309;
+    margin-bottom: 8px;
+  }
+  .reciprocal-highlight .katex { font-size: 1.4em; }
+  .question-card {
+    background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+    border: 2px solid #a78bfa;
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+  }
+  .question-card h4 {
+    font-size: 15px;
+    color: #7c3aed;
+    margin-bottom: 8px;
+  }
+  .question-card .katex { font-size: 1.3em; }
+  @media (max-width: 700px) {
+    .top-section { flex-direction: column; align-items: center; }
+    .controls { width: 100%; }
+    .main-card { padding: 24px 20px; }
+    .examples-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>倒数的认识 · 交互演示</h1>
+<p class="subtitle">拖动滑块，观察倒数的关系和乘积为1的规律</p>
+
+<div class="main-card">
+  <div class="top-section">
+    <div class="canvas-wrap">
+      <canvas id="reciprocalCanvas" width="340" height="340"></canvas>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>分子 <span id="vNum">3</span></label>
+        <input type="range" id="sNum" min="1" max="12" value="3">
+      </div>
+      <div class="control-group">
+        <label>分母 <span id="vDen">8</span></label>
+        <input type="range" id="sDen" min="2" max="16" value="8">
+      </div>
+      <hr class="divider">
+      <div class="fraction-display" id="eqLine1"></div>
+      <div class="fraction-display" id="eqLine2" style="margin-top: 8px;"></div>
+    </div>
+  </div>
+
+  <div class="reciprocal-highlight" id="reciprocalDef"></div>
+
+  <div class="examples-grid">
+    <div class="example-card">
+      <div id="ex1"></div>
+      <div class="example-label">乘积为1</div>
+    </div>
+    <div class="example-card">
+      <div id="ex2"></div>
+      <div class="example-label">乘积为1</div>
+    </div>
+    <div class="example-card">
+      <div id="ex3"></div>
+      <div class="example-label">乘积为1</div>
+    </div>
+    <div class="example-card">
+      <div id="ex4"></div>
+      <div class="example-label">乘积为1</div>
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <h3>分步解析</h3>
+    <div id="steps"></div>
+  </div>
+
+  <div class="question-card" id="question"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('reciprocalCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height, CX = W/2, CY = H/2;
+
+const sNum = document.getElementById('sNum');
+const sDen = document.getElementById('sDen');
+const vNum = document.getElementById('vNum');
+const vDen = document.getElementById('vDen');
+
+function renderKatex(el, tex) {
+  try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+  catch(e) { el.textContent = tex; }
+}
+
+function drawReciprocal(num, den) {
+  ctx.clearRect(0, 0, W, H);
+
+  const rectW = 260;
+  const rectH = 60;
+  const x0 = (W - rectW) / 2;
+
+  // Title
+  ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'center';
+  ctx.fillText('乘积为 1 的两个数互为倒数', CX, 24);
+
+  // Top rectangle: num/den
+  const yTop = 60;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, yTop, rectW, rectH);
+  const sliceW = rectW / den;
+  ctx.fillStyle = '#3b82f6';
+  ctx.globalAlpha = 0.35;
+  for (let i = 0; i < num; i++) {
+    ctx.fillRect(x0 + i * sliceW + 1, yTop + 1, sliceW - 2, rectH - 2);
+  }
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= den; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x0 + i * sliceW, yTop);
+    ctx.lineTo(x0 + i * sliceW, yTop + rectH);
+    ctx.stroke();
+  }
+  ctx.strokeRect(x0, yTop, rectW, rectH);
+
+  // Label top
+  ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#2563eb';
+  ctx.textAlign = 'left';
+  ctx.fillText(num + '/' + den, x0 + rectW + 10, yTop + rectH / 2 + 5);
+
+  // Times sign
+  ctx.font = 'bold 20px -apple-system, sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.fillText('×', CX, yTop + rectH + 30);
+
+  // Bottom rectangle: den/num
+  const yBot = yTop + rectH + 44;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(x0, yBot, rectW, rectH);
+  // Show den/num as whole + fraction
+  const wholePart = Math.floor(den / num);
+  const remainder = den % num;
+  if (remainder === 0) {
+    // It's a whole number
+    ctx.fillStyle = '#f59e0b';
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(x0 + 1, yBot + 1, rectW - 2, rectH - 2);
+    ctx.globalAlpha = 1;
+  } else {
+    // Show wholePart full blocks + remainder/num partial
+    const blockW = rectW / den;
+    ctx.fillStyle = '#f59e0b';
+    ctx.globalAlpha = 0.35;
+    for (let i = 0; i < den; i++) {
+      ctx.fillRect(x0 + i * blockW + 1, yBot + 1, blockW - 2, rectH - 2);
+    }
+    ctx.globalAlpha = 1;
+  }
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.strokeRect(x0, yBot, rectW, rectH);
+
+  // Label bottom
+  ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillStyle = '#d97706';
+  ctx.textAlign = 'left';
+  if (den % num === 0) {
+    ctx.fillText(den / num, x0 + rectW + 10, yBot + rectH / 2 + 5);
+  } else {
+    ctx.fillText(den + '/' + num, x0 + rectW + 10, yBot + rectH / 2 + 5);
+  }
+
+  // Equals 1
+  ctx.font = 'bold 20px -apple-system, sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.fillText('=', CX, yBot + rectH + 30);
+
+  // Result box
+  const yRes = yBot + rectH + 44;
+  ctx.fillStyle = '#dcfce7';
+  ctx.strokeStyle = '#22c55e';
+  ctx.lineWidth = 2;
+  const resW = 80, resH = 40;
+  ctx.beginPath();
+  ctx.roundRect(CX - resW/2, yRes, resW, resH, 10);
+  ctx.fill();
+  ctx.stroke();
+  ctx.font = 'bold 20px -apple-system, sans-serif';
+  ctx.fillStyle = '#16a34a';
+  ctx.textAlign = 'center';
+  ctx.fillText('1', CX, yRes + 27);
+
+  // Arrows
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  // arrow from top to bottom right
+  ctx.beginPath();
+  ctx.moveTo(x0 + rectW + 36, yTop + rectH / 2 + 5);
+  ctx.lineTo(x0 + rectW + 36, yBot + rectH / 2 - 10);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function update() {
+  let num = +sNum.value;
+  let den = +sDen.value;
+  if (num >= den) { num = den - 1; sNum.value = num; }
+  sNum.max = den - 1;
+
+  vNum.textContent = num;
+  vDen.textContent = den;
+
+  drawReciprocal(num, den);
+
+  // Equation lines
+  const eq1 = document.getElementById('eqLine1');
+  renderKatex(eq1, '\\frac{' + num + '}{' + den + '} \\times \\frac{' + den + '}{' + num + '} = 1');
+
+  const eq2 = document.getElementById('eqLine2');
+  if (den % num === 0) {
+    renderKatex(eq2, '\\text{即 } \\frac{' + num + '}{' + den + '} \\times ' + (den / num) + ' = 1');
+  } else {
+    renderKatex(eq2, '\\text{即 } \\frac{' + num + '}{' + den + '} \\times \\frac{' + den + '}{' + num + '} = 1');
+  }
+
+  // Reciprocal definition
+  const def = document.getElementById('reciprocalDef');
+  def.innerHTML = '<h4>倒数的定义</h4>';
+  const defTex = document.createElement('div');
+  renderKatex(defTex, '\\text{乘积是 } 1 \\text{ 的两个数互为倒数。}');
+  def.appendChild(defTex);
+
+  // Examples from the textbook
+  renderKatex(document.getElementById('ex1'), '\\frac{3}{8} \\times \\frac{8}{3} = 1');
+  renderKatex(document.getElementById('ex2'), '\\frac{7}{15} \\times \\frac{15}{7} = 1');
+  renderKatex(document.getElementById('ex3'), '5 \\times \\frac{1}{5} = 1');
+  renderKatex(document.getElementById('ex4'), '\\frac{1}{12} \\times 12 = 1');
+
+  // Steps
+  const stepsEl = document.getElementById('steps');
+  let html = '';
+
+  html += '<div class="step"><span class="step-num">1</span><span>';
+  const s1 = document.createElement('span');
+  renderKatex(s1, '\\text{观察：} \\frac{' + num + '}{' + den + '} \\text{ 的分子分母颠倒位置}');
+  html += s1.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">2</span><span>';
+  const s2 = document.createElement('span');
+  renderKatex(s2, '\\text{得到 } \\frac{' + den + '}{' + num + '}');
+  html += s2.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">3</span><span>';
+  const s3 = document.createElement('span');
+  renderKatex(s3, '\\text{验证：} \\frac{' + num + '}{' + den + '} \\times \\frac{' + den + '}{' + num + '} = \\frac{' + num + ' \\times ' + den + '}{' + den + ' \\times ' + num + '} = \\frac{' + (num * den) + '}{' + (den * num) + '} = 1');
+  html += s3.innerHTML + '</span></div>';
+
+  html += '<div class="step"><span class="step-num">4</span><span>';
+  const s4 = document.createElement('span');
+  renderKatex(s4, '\\text{所以 } \\frac{' + num + '}{' + den + '} \\text{ 和 } \\frac{' + den + '}{' + num + '} \\text{ 互为倒数}');
+  html += s4.innerHTML + '</span></div>';
+
+  stepsEl.innerHTML = html;
+
+  // Question
+  const q = document.getElementById('question');
+  q.innerHTML = '<h4>想一想</h4>';
+  const qTex = document.createElement('div');
+  renderKatex(qTex, '\\text{互为倒数的两个数有什么特点？}');
+  q.appendChild(qTex);
+}
+
+sNum.addEventListener('input', update);
+sDen.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
